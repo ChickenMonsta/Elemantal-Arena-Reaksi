@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elemental Arena: Reaksi - Companion Web</title>
+<link rel="icon" type="image/png" href="logo.png">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=MedievalSharp&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+@font-face {
+  font-family: 'Lifecraft';
+  src: url('https://fonts.cdnfonts.com/s/14107/Lifecraft.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+}
+
+:root {
+  --gold: #dfac40;
+  --gold2: #fbe29a;
+  --rune: #ff4500;
+  --ink: #2a1a12;
+}
+
+* { -webkit-tap-highlight-color: transparent; }
+
+body {
+  background: radial-gradient(ellipse at 50% 0%, #3a0f06 0%, #120504 45%, #050202 100%) fixed;
+  color: #f3e5c8;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  overflow-x: hidden;
+  user-select: none;
+}
+
+.f-title { font-family: 'Lifecraft', 'Cinzel Decorative', 'MedievalSharp', serif; }
+.f-med { font-family: 'MedievalSharp', serif; }
+
+.shine {
+  background: linear-gradient(90deg, #b8741a, #fbe29a, #ff7a1a, #fbe29a, #b8741a);
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: shine 5s linear infinite;
+  filter: drop-shadow(0 0 14px rgba(255, 100, 0, 0.55));
+}
+@keyframes shine { to { background-position: -250% 0; } }
+
+/* HERO */
+.hero {
+  position: relative;
+  border-radius: 1.5rem;
+  overflow: hidden;
+  border: 2px solid rgba(223, 172, 64, 0.45);
+  background: linear-gradient(180deg, #1b0a06, #3b0e05 70%, #7a1d05);
+  box-shadow: 0 0 50px rgba(255, 69, 0, 0.35), inset 0 -40px 80px rgba(255, 90, 0, 0.35);
+}
+.hero::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(115deg, transparent 0 22px, rgba(255, 255, 255, 0.025) 22px 24px);
+  pointer-events: none;
+}
+.hero .lava {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 34px;
+  background: linear-gradient(90deg, #ff3d00, #ffb300, #ff3d00);
+  background-size: 200% 100%;
+  animation: lava 4s linear infinite;
+  filter: blur(14px);
+  opacity: 0.75;
+}
+@keyframes lava { to { background-position: 200% 0; } }
+
+/* Kucing terbang di atas layar */
+.fly-cat {
+  position: fixed;
+  top: 12%;
+  left: -160px;
+  width: 110px;
+  z-index: 45;
+  pointer-events: none;
+  filter: drop-shadow(0 6px 10px rgba(0,0,0,0.7));
+  animation: fly 22s linear infinite;
+}
+@keyframes fly {
+  0% { transform: translate(0, 0) rotate(-6deg); }
+  25% { transform: translate(30vw, -30px) rotate(4deg); }
+  50% { transform: translate(60vw, 40px) rotate(-5deg); }
+  75% { transform: translate(90vw, -20px) rotate(5deg); }
+  100% { transform: translate(calc(100vw + 200px), 10px) rotate(-4deg); }
+}
+
+/* BUKU */
+.book {
+  background: linear-gradient(145deg, #2a120c, #120604);
+  border: 3px solid transparent;
+  border-radius: 1.6rem;
+  position: relative;
+  box-shadow: 0 30px 70px rgba(0,0,0,0.9), 0 0 50px rgba(255,69,0,0.25);
+  background-clip: padding-box;
+}
+.book::before {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border-radius: inherit;
+  z-index: -1;
+  background: linear-gradient(120deg, #8a5a12, #fbe29a, #b8741a, #ff7a1a, #fbe29a, #8a5a12);
+  background-size: 300% 300%;
+  animation: lava 8s linear infinite;
+}
+.parchment {
+  background: radial-gradient(circle at 30% 20%, rgba(139,69,19,0.1), transparent 60%), radial-gradient(circle, transparent 60%, rgba(60,25,10,0.35)), #f3e5c8;
+  box-shadow: inset 0 0 55px rgba(74,38,14,0.35);
+  color: var(--ink);
+}
+.dark {
+  background: radial-gradient(circle at 50% 0, rgba(255,69,0,0.14), transparent 70%), #160b08;
+  box-shadow: inset 0 0 60px #000;
+  color: #f3e5c8;
+}
+.spine { background: linear-gradient(90deg, transparent, rgba(0,0,0,0.55), transparent); }
+
+.page { animation: pg .55s cubic-bezier(.2,.8,.2,1) both; }
+.page.r { animation-name: pgr; }
+@keyframes pg { from { opacity: 0; transform: perspective(1200px) rotateY(14deg) translateX(-18px); } }
+@keyframes pgr { from { opacity: 0; transform: perspective(1200px) rotateY(-14deg) translateX(18px); } }
+
+.card {
+  background: rgba(120,60,20,0.09);
+  border: 1px solid rgba(120,60,20,0.3);
+  border-radius: .9rem;
+  transition: .25s;
+}
+.card:hover {
+  transform: translateY(-3px) rotate(-.4deg);
+  box-shadow: 0 8px 18px rgba(80,30,5,0.3);
+  border-color: #b8741a;
+}
+.el { transition: transform .25s, box-shadow .25s; }
+.el:hover { transform: translateY(-4px) scale(1.05) rotateX(8deg); box-shadow: 0 0 18px currentColor; }
+
+/* Tab */
+.tab {
+  clip-path: polygon(0 0, 100% 0, 88% 100%, 0 100%);
+  transition: .25s;
+  background: #1c1210;
+  color: #cbbba0;
+  border-left: 4px solid #5c4a3a;
+}
+.tab:hover { transform: translateX(6px); color: #fbe29a; }
+.tab.on {
+  background: linear-gradient(90deg, #b8741a, #ff6a1a);
+  color: #2a0c02;
+  border-left-color: #fbe29a;
+  box-shadow: 0 0 18px rgba(255,106,26,0.6);
+}
+
+/* Tombol */
+.btn-fire {
+  background: linear-gradient(90deg, #ff4500, #ff9d00, #ff4500);
+  background-size: 200% 100%;
+  animation: lava 3s linear infinite;
+  box-shadow: 0 0 24px rgba(255,90,0,0.6);
+  transition: .2s;
+}
+.btn-fire:hover { transform: scale(1.03); }
+.btn-fire:active { transform: scale(.97); }
+
+.shake { animation: shake .5s; }
+@keyframes shake {
+  20% { transform: translate(-6px, 3px); }
+  40% { transform: translate(6px, -4px); }
+  60% { transform: translate(-4px, -3px); }
+  80% { transform: translate(4px, 3px); }
+}
+
+#toast {
+  position: fixed;
+  bottom: 22px;
+  left: 50%;
+  transform: translate(-50%, 120px);
+  background: #1c0d08;
+  border: 1px solid var(--gold);
+  color: var(--gold2);
+  padding: .7rem 1.2rem;
+  border-radius: 999px;
+  z-index: 90;
+  transition: .4s;
+  box-shadow: 0 0 22px rgba(255,140,0,0.45);
+  font-size: .8rem;
+  font-weight: 700;
+}
+#toast.show { transform: translate(-50%, 0); }
+
+#boom {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle, rgba(255,80,0,0.55), rgba(0,0,0,0.92));
+  backdrop-filter: blur(4px);
+}
+#boom.show { display: flex; animation: fade .3s; }
+@keyframes fade { from { opacity: 0; } }
+
+.sw::-webkit-scrollbar { width: 6px; }
+.sw::-webkit-scrollbar-thumb { background: #8b4513; border-radius: 4px; }
+</style>
+</head>
+<body class="min-h-screen">
+<canvas id="sparks" class="fixed inset-0 pointer-events-none z-0"></canvas>
+<img class="fly-cat" src="https://media.tenor.com/lXMg2FMhfhQAAAAi/pusheen-harry-potter.gif" alt="Kucing terbang">
+
+<header class="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-amber-500/30 px-4 py-2.5">
+ <div class="max-w-7xl mx-auto flex items-center justify-between">
+  <div class="flex items-center gap-3">
+   <img src="logo.png" onerror="this.onerror=null;this.src='https://media.tenor.com/oT6s6zOeo9IAAAAi/volcano-joypixels.gif'" class="w-10 h-10 object-contain drop-shadow-[0_0_8px_#ff4500]" alt="Logo Game">
+   <div>
+    <h1 class="f-title font-black text-xl sm:text-2xl shine leading-none">ELEMENTAL ARENA</h1>
+    <span class="f-med text-[10px] text-orange-400 tracking-widest">REAKSI • GRIMOIRE WEB COMPANION</span>
+   </div>
+  </div>
+  <div class="flex items-center gap-3">
+   <span class="hidden md:block text-xs font-mono text-amber-400/80"><i class="fa-solid fa-book-bookmark text-orange-500 mr-1"></i><span id="ind">Lembar I / VII</span></span>
+   <button onclick="toggleAudio()" class="px-3 py-1.5 rounded-xl bg-orange-950/60 border border-orange-500/40 text-amber-300 text-xs font-bold hover:bg-orange-900 transition"><i id="aic" class="fa-solid fa-volume-high mr-1"></i><span id="atx">SFX: ON</span></button>
+  </div>
+ </div>
+</header>
+
+<main class="relative z-10 max-w-6xl mx-auto px-2 sm:px-6 py-6 pb-24 space-y-6">
+
+<!-- HERO -->
+<section class="hero p-5 sm:p-8 grid md:grid-cols-[1fr_auto] gap-6 items-center">
+ <div class="relative z-10 space-y-3">
+  <span class="f-med text-xs text-amber-300 tracking-[.3em]">⚗️ BOARD GAME KIMIA • 2–4 PEMAIN</span>
+  <h2 class="f-title font-black text-4xl sm:text-6xl shine leading-tight">RAKIT REAKSI.<br>HANCURKAN LAWAN.</h2>
+  <p class="text-sm text-amber-100/80 max-w-lg">Kumpulkan amunisi unsur, racik reaksi kimia paling mematikan, dan pertahankan tamengmu sampai lawan terakhir tumbang!</p>
+  <div class="flex flex-wrap gap-3 pt-2">
+   <button onclick="goToSpread(2)" class="btn-fire px-5 py-2.5 rounded-xl text-black font-bold text-sm"><i class="fa-solid fa-flask mr-1"></i> Buka Grimoire</button>
+   <button onclick="goToSpread(4)" class="px-5 py-2.5 rounded-xl border border-amber-400/60 text-amber-300 font-bold text-sm hover:bg-amber-400/10 transition"><i class="fa-solid fa-fire mr-1"></i> Lab Cauldron</button>
+  </div>
+ </div>
+ <div class="relative z-10 flex items-center justify-center gap-4">
+  <img src="logo.png" onerror="this.onerror=null;this.src='https://media.tenor.com/oT6s6zOeo9IAAAAi/volcano-joypixels.gif'" class="w-32 sm:w-44 drop-shadow-[0_0_25px_#ff4500] hover:scale-105 transition duration-300" alt="Logo Utama">
+  <img src="https://media.tenor.com/K3j9pwWlME0AAAAj/fire-flame.gif" class="w-16 sm:w-20 opacity-80" alt="Api">
+ </div>
+ <div class="lava"></div>
+</section>
+
+<div class="relative">
+ <div class="flex flex-wrap lg:flex-col gap-1.5 mb-4 lg:mb-0 lg:absolute lg:-right-36 lg:top-6 z-30" id="tabs"></div>
+
+ <div class="book p-3 sm:p-6">
+  <div class="hidden lg:block absolute left-1/2 top-4 bottom-16 w-14 -ml-7 spine z-20 pointer-events-none"></div>
+  <div id="stage" class="relative grid grid-cols-1 lg:grid-cols-2 min-h-[640px] overflow-hidden rounded-2xl border-2 border-amber-900/60">
+
+   <!-- 1 -->
+   <section data-s="1" class="page parchment p-5 sm:p-8 flex-col justify-between lg:border-r border-amber-900/40">
+    <div class="space-y-4">
+     <Hd t="HALAMAN 01 • PROLOG" s="Grimoire Utilitatis"></Hd>
+     <h2 class="f-title font-black text-3xl text-amber-950 leading-tight">ELEMENTAL ARENA: REAKSI</h2>
+     <p class="text-sm italic font-serif text-stone-800">"Di arena laboratorium futuristik, para Alchemist bertarung adu kombinasi kimia amunisi untuk mengeliminasi HP lawan!"</p>
+     <div class="grid grid-cols-3 gap-2">
+      <div class="card p-2 text-center"><i class="fa-solid fa-users text-amber-800 block mb-1"></i><b class="text-xs">2–4 Pemain</b></div>
+      <div class="card p-2 text-center"><i class="fa-solid fa-stopwatch text-amber-800 block mb-1"></i><b class="text-xs">15–25 Mnt</b></div>
+      <div class="card p-2 text-center"><i class="fa-solid fa-graduation-cap text-amber-800 block mb-1"></i><b class="text-xs">Usia 12+</b></div>
+     </div>
+     <div class="card p-3 text-xs border-l-4 !border-l-amber-800"><b>🎯 Tujuan Utama:</b> Kumpulkan kartu Unsur, eksekusi resep dari Pasar Reaksi, dan kurangi HP lawan dari 20 hingga 0!</div>
+     <div class="flex items-center justify-center gap-2 pt-2">
+      <img src="https://media.tenor.com/MLBe2ZW6un8AAAAj/xcpotter-harry-potter.gif" class="w-16 h-16 object-contain" alt="Sapu Terbang">
+      <img src="https://media.tenor.com/jFWAjcFQSqIAAAAj/stone-throwing.gif" class="w-16 h-16 object-contain" alt="Batu">
+     </div>
+    </div>
+    <Ft t="Elemental Arena Board Game" n="01"></Ft>
+   </section>
+   <section data-s="1" class="page r parchment p-5 sm:p-8 flex-col justify-between">
+    <div class="space-y-4">
+     <Hd t="HALAMAN 02 • VISUAL ARENA" s="Artwork & Frame"></Hd>
+     <div class="grid grid-cols-2 gap-4">
+      <div class="text-center space-y-1">
+       <span class="text-[11px] font-bold text-amber-900 block">poster.png</span>
+       <div class="rounded-xl overflow-hidden border-2 border-amber-900/50 shadow-xl bg-black aspect-[3/4] relative group">
+        <img id="img-poster" src="poster.png" onerror="this.onerror=null;this.src='https://placehold.co/400x600/260c08/ff8c00?text=Poster+Game'" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+        <button onclick="openModal('img-poster')" class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition text-amber-300 font-bold text-xs flex items-center justify-center gap-1"><i class="fa-solid fa-expand"></i> Zoom</button>
+       </div>
+      </div>
+      <div class="text-center space-y-1">
+       <span class="text-[11px] font-bold text-amber-900 block">kartu.png</span>
+       <div class="rounded-xl overflow-hidden border-2 border-amber-900/50 shadow-xl bg-stone-900 aspect-[3/4] relative group">
+        <img id="img-kartu" src="kartu.png" onerror="this.onerror=null;this.src='https://placehold.co/400x600/1a0d0a/dfac40?text=Frame+Kartu'" class="w-full h-full object-contain p-1 group-hover:scale-105 transition duration-500">
+        <button onclick="openModal('img-kartu')" class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition text-amber-300 font-bold text-xs flex items-center justify-center gap-1"><i class="fa-solid fa-expand"></i> Zoom</button>
+       </div>
+      </div>
+     </div>
+     <div class="card p-2.5 flex items-center gap-3 text-xs"><img src="https://media.tenor.com/lXMg2FMhfhQAAAAi/pusheen-harry-potter.gif" class="w-12"><span>Klik pada gambar untuk memperbesar mode pratinjau penuh.</span></div>
+    </div>
+    <Ft t="Desain Grafis Master" n="02"></Ft>
+   </section>
+
+   <!-- 2 -->
+   <section data-s="2" class="page parchment p-5 sm:p-8 flex-col justify-between lg:border-r border-amber-900/40">
+    <div class="space-y-4">
+     <Hd t="HALAMAN 03 • KATALOG UNSUR" s="Amunisi Kimia"></Hd>
+     <p class="text-xs">Terdapat <b>68 Kartu Unsur</b> sebagai bahan amunisi dasar:</p>
+     <div id="elList" class="grid grid-cols-2 gap-2 text-xs sw max-h-96 overflow-y-auto pr-1"></div>
+    </div>
+    <Ft t="Katalog Deck Utama" n="03"></Ft>
+   </section>
+   <section data-s="2" class="page r parchment p-5 sm:p-8 flex-col justify-between">
+    <div class="space-y-4">
+     <Hd t="HALAMAN 04 • TAMENG & KATALIS" s="Pertahanan Lab"></Hd>
+     <div class="space-y-3 text-xs">
+      <div class="card p-3 space-y-1"><h4 class="font-bold flex gap-2 items-center"><i class="fa-solid fa-shield-halved text-cyan-800"></i> Kartu Tameng (12 Kartu)</h4>
+       <ul><li>• <b>4x Dinding Argon</b> (Ar): +4 Shield Point</li><li>• <b>4x Pelindung Besi</b> (Fe): +6 Shield Point</li><li>• <b>4x Pertahanan Intan</b> (C): +10 Shield Point</li></ul></div>
+      <div class="card p-3 space-y-1"><h4 class="font-bold flex gap-2 items-center"><i class="fa-solid fa-bolt text-yellow-700"></i> Katalis & Event Lab (12 Kartu)</h4>
+       <ul><li>• <b>3x Suhu Tinggi</b>: +3 Damage Reaksi</li><li>• <b>3x Percikan Listrik</b>: +2 Damage & Stun 1 Energi</li><li>• <b>3x Ruang Vakum</b>: Kebal semua serangan AOE 1 turn</li><li>• <b>3x Katalis Platinum</b>: Diskon biaya energi -1</li></ul></div>
+     </div>
+    </div>
+    <Ft t="Modul Proteksi" n="04"></Ft>
+   </section>
+
+   <!-- 3 -->
+   <section data-s="3" class="page parchment p-5 sm:p-8 flex-col justify-between lg:border-r border-amber-900/40">
+    <div class="space-y-4">
+     <Hd t="HALAMAN 05 • GRIMOIRE RESEP" s="Pasar Reaksi"></Hd>
+     <p class="text-xs">Daftar resep serangan di Pasar Reaksi terbuka (28 Kartu Reaksi):</p>
+     <div id="rcL" class="space-y-2 text-xs sw max-h-96 overflow-y-auto pr-1"></div>
+    </div>
+    <Ft t="Formula Kimia I" n="05"></Ft>
+   </section>
+   <section data-s="3" class="page r parchment p-5 sm:p-8 flex-col justify-between">
+    <div class="space-y-4">
+     <Hd t="HALAMAN 06 • REAKSI SUPER" s="Formula Pamungkas"></Hd>
+     <div id="rcR" class="space-y-2 text-xs sw max-h-96 overflow-y-auto pr-1"></div>
+    </div>
+    <Ft t="Formula Kimia II" n="06"></Ft>
+   </section>
+
+   <!-- 4 -->
+   <section data-s="4" class="page dark p-5 sm:p-8 flex-col justify-between lg:border-r border-amber-900/40">
+    <div class="space-y-4">
+     <Hd t="HALAMAN 07 • CAULDRON SIMULATOR" s="Pilih Unsur" d="1"></Hd>
+     <p class="text-xs text-stone-300">Pilih unsur di bawah ini untuk dimasukkan ke kawah racikan:</p>
+     <div class="grid grid-cols-3 sm:grid-cols-5 gap-2" id="pick"></div>
+     <button onclick="resetCauldron()" class="w-full py-1.5 rounded-xl bg-red-950/80 border border-red-500/40 text-red-300 text-xs font-bold hover:bg-red-900 transition"><i class="fa-solid fa-rotate-left mr-1"></i>Kosongkan Cauldron</button>
+    </div>
+    <Ft t="Modul Perakitan" n="07" d="1"></Ft>
+   </section>
+   <section data-s="4" class="page r dark p-5 sm:p-8 flex-col justify-between">
+    <div class="space-y-4">
+     <Hd t="HALAMAN 08 • EFEK LEDAKAN" s="Eksperimen Lab" d="1"></Hd>
+     <div class="bg-black/70 p-3 rounded-2xl border border-orange-500/30 space-y-2">
+      <div class="flex justify-between text-xs"><span class="text-orange-400 font-bold uppercase"><i class="fa-solid fa-flask mr-1"></i>Isi Kawah</span><span id="cc" class="font-mono text-amber-300 font-bold">0 Unsur</span></div>
+      <div id="cd" class="flex flex-wrap gap-1.5 min-h-[42px] items-center"></div>
+     </div>
+     <button onclick="synthesizeSpell()" class="btn-fire w-full py-3 rounded-2xl text-black f-title font-black text-lg flex items-center justify-center gap-2">💥 RAKIT & TRIGGER REAKSI!</button>
+     
+     <div id="brewing" class="hidden text-center py-4 space-y-2">
+      <img src="https://media.tenor.com/SI8_LVMnpA4AAAAi/halloween-cauldron.gif" class="w-24 mx-auto drop-shadow-[0_0_15px_#ff4500]" alt="Cauldron Meracik">
+      <p class="text-xs text-amber-300 font-bold animate-pulse">Meracik elemen kimia di kawah...</p>
+     </div>
+
+     <div id="out" class="hidden p-4 rounded-2xl bg-stone-900 border-2 border-orange-500 text-center space-y-2 shadow-2xl">
+      <div id="oi" class="text-3xl"></div>
+      <h3 id="ot" class="f-title font-black text-xl text-amber-300 shine"></h3>
+      <p id="od" class="text-xs text-stone-200"></p>
+      <div id="orc" class="text-[10px] text-amber-400 font-mono"></div>
+     </div>
+    </div>
+    <Ft t="Output Eksperimen" n="08" d="1"></Ft>
+   </section>
+
+   <!-- 5 -->
+   <section data-s="5" class="page parchment p-5 sm:p-8 flex-col justify-between lg:border-r border-amber-900/40">
+    <div class="space-y-4">
+     <Hd t="HALAMAN 09 • ALUR GILIRAN" s="3 Fase Turn"></Hd>
+     <div class="space-y-2 text-xs">
+      <div class="card p-2.5"><b>FASE 1: AMBIL KARTU (DRAW)</b><p>• Ambil 2 kartu dari Deck Utama. Batas maksimal 7 kartu di tangan.</p></div>
+      <div class="card p-2.5"><b>FASE 2: AKSI (3 ENERGI)</b><ul class="list-disc list-inside space-y-1"><li><b>Rakit Serangan (1–3 E):</b> Buang kartu unsur dari tangan sesuai syarat di Pasar Reaksi.</li><li><b>Pasang Tameng (1–2 E):</b> Tambah Shield Point.</li><li><b>Daur Ulang (1 E):</b> Buang 2 unsur tak terpakai untuk ambil 1 kartu baru.</li></ul></div>
+      <div class="card p-2.5"><b>FASE 3: AKHIR GILIRAN</b><p>• Sisa Energi hangus. Isi Pasar Reaksi kembali ke 4 kartu. Oper giliran.</p></div>
+     </div>
+    </div>
+    <Ft t="Panduan Alur Turn" n="09"></Ft>
+   </section>
+   <section data-s="5" class="page r parchment p-5 sm:p-8 flex-col justify-between">
+    <div class="space-y-4">
+     <Hd t="HALAMAN 10 • CATATAN PENTING" s="Sistem Shield"></Hd>
+     <div class="space-y-3 text-xs">
+      <div class="card p-3"><h4 class="font-bold">🛡️ Mekanisme Shield Point</h4><p>Serangan lawan menguras Shield Point terlebih dahulu. Jika Shield habis, sisa damage mengikis HP utama (20 HP).</p></div>
+      <div class="card p-3"><h4 class="font-bold">⚡ Efek Instan (Tanpa Tracking DoT)</h4><p>Damage racun dan efek burn langsung diproses seketika tanpa perlu mencatat status 2-3 turn ke depan.</p></div>
+      <div class="card p-3 flex items-center gap-3"><img src="https://media.tenor.com/oT6s6zOeo9IAAAAi/volcano-joypixels.gif" class="w-12"><p class="font-bold">Reaksi Pamungkas = Letusan fatal! 🌋</p></div>
+     </div>
+    </div>
+    <Ft t="Sistem Pertempuran" n="10"></Ft>
+   </section>
+
+   <!-- 6 -->
+   <section data-s="6" class="page dark p-5 sm:p-8 flex-col justify-between lg:border-r border-amber-900/40">
+    <div class="space-y-4">
+     <Hd t="HALAMAN 11 • ULASAN PLAYER" s="Kirim Feedback" d="1"></Hd>
+     <form onsubmit="submitReview(event)" class="space-y-3 text-xs">
+      <div><label class="block font-bold mb-1">Nama Alchemist</label><input id="rn" required placeholder="Contoh: Profezor X" class="w-full bg-black/80 border border-orange-500/30 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-orange-500"></div>
+      <div><label class="block font-bold mb-1">Bintang Rating</label><div class="flex items-center gap-2 text-2xl text-stone-600" id="sb">
+       <button type="button" onclick="setStars(1)" class="sb hover:scale-125 transition">★</button><button type="button" onclick="setStars(2)" class="sb hover:scale-125 transition">★</button><button type="button" onclick="setStars(3)" class="sb hover:scale-125 transition">★</button><button type="button" onclick="setStars(4)" class="sb hover:scale-125 transition">★</button><button type="button" onclick="setStars(5)" class="sb hover:scale-125 transition">★</button><span id="st" class="text-xs font-bold text-amber-400 ml-2">0 Bintang</span></div></div>
+      <div><label class="block font-bold mb-1">Pesan & Masukan</label><textarea id="rm" rows="3" required placeholder="Tuliskan masukanmu..." class="w-full bg-black/80 border border-orange-500/30 rounded-xl px-3 py-2 text-white focus:outline-none focus:border-orange-500"></textarea></div>
+      <button type="submit" id="rb" class="btn-fire w-full py-2.5 rounded-xl text-black font-bold uppercase tracking-wider"><i class="fa-solid fa-paper-plane mr-1"></i> Kirim Ulasan</button>
+     </form>
+    </div>
+    <Ft t="Form Feedback Live" n="11" d="1"></Ft>
+   </section>
+   <section data-s="6" class="page r dark p-5 sm:p-8 flex-col justify-between">
+    <div class="space-y-4">
+     <Hd t="HALAMAN 12 • FEED KOMUNITAS" s="Live Reviews" d="1"></Hd>
+     <div class="bg-black/60 p-3 rounded-xl border border-orange-500/30 flex justify-between items-center text-xs">
+      <div><span class="text-stone-400">Rata-Rata</span><div class="text-3xl f-title font-black text-amber-400" id="an">0.0</div></div>
+      <div class="text-right"><div class="text-amber-400 text-lg" id="as">☆☆☆☆☆</div><span id="ac" class="text-stone-400">0 Ulasan</span></div>
+     </div>
+     <div id="feed" class="space-y-2 sw max-h-64 overflow-y-auto pr-1"><p class="text-xs text-stone-500 italic text-center py-4">Memuat ulasan live...</p></div>
+    </div>
+    <Ft t="Komunitas Grimoire" n="12" d="1"></Ft>
+   </section>
+
+   <!-- 7: SUPPORT US -->
+   <section data-s="7" class="page parchment p-5 sm:p-8 flex-col justify-between lg:border-r border-amber-900/40">
+    <div class="space-y-4">
+     <Hd t="HALAMAN 13 • SUPPORT US" s="Dukung Pengembang"></Hd>
+     <p class="text-xs text-stone-800">Sukai board game kami? Dukung terus pengembangan <b>Elemental Arena: Reaksi</b> agar dapat memproduksi versi fisik & ekspansi baru!</p>
+     <div class="text-center space-y-2 py-2">
+      <span class="text-xs font-bold text-amber-900 block"><i class="fa-solid fa-qrcode mr-1"></i> Scan QRIS Pembayaran</span>
+      <div class="w-44 h-44 mx-auto bg-white p-2 rounded-2xl border-2 border-amber-900/40 shadow-lg flex items-center justify-center">
+       <img id="img-qris" src="qris.png" onerror="this.onerror=null;this.src='https://placehold.co/300x300/ffffff/000000?text=QRIS+Dukungan'" class="w-full h-full object-contain">
+      </div>
+     </div>
+    </div>
+    <Ft t="Pengembangan Game" n="13"></Ft>
+   </section>
+   <section data-s="7" class="page r parchment p-5 sm:p-8 flex-col justify-between">
+    <div class="space-y-4">
+     <Hd t="HALAMAN 14 • TRAKTEER & CONTACT" s="Platform Dukungan"></Hd>
+     <div class="space-y-3 text-xs">
+      <div class="card p-4 text-center space-y-3">
+       <i class="fa-solid fa-heart text-3xl text-red-600 animate-bounce"></i>
+       <h3 class="f-title text-lg font-bold text-amber-950">Dukung via Trakteer</h3>
+       <p class="text-stone-700">Traktir kopi Alchemist kami melalui platform Trakteer id!</p>
+       <a href="https://trakteer.id" target="_blank" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white font-bold transition shadow-lg">
+        <i class="fa-solid fa-mug-hot"></i> Buka Trakteer
+       </a>
+      </div>
+      <div class="card p-3 flex items-center gap-3">
+       <img src="https://media.tenor.com/K3j9pwWlME0AAAAj/fire-flame.gif" class="w-10">
+       <p class="text-[11px]">Terima kasih atas seluruh masukan dan dukunganmu untuk game edukasi kami!</p>
+      </div>
+     </div>
+    </div>
+    <Ft t="Terima Kasih!" n="14"></Ft>
+   </section>
+
+  </div>
+
+  <div class="mt-4 flex items-center justify-between pt-3 border-t border-amber-500/20">
+   <button onclick="prevSpread()" id="bp" class="px-4 py-2 rounded-xl bg-amber-950/80 border border-amber-500/40 text-amber-300 f-med text-xs font-bold hover:bg-amber-900 transition disabled:opacity-30 disabled:pointer-events-none"><i class="fa-solid fa-arrow-left mr-1"></i> Sebelumnya</button>
+   <span class="text-[10px] text-amber-500 font-mono text-center">Navigasikan dengan tombol atau tombol panah keyboard</span>
+   <button onclick="nextSpread()" id="bn" class="px-4 py-2 rounded-xl bg-amber-950/80 border border-amber-500/40 text-amber-300 f-med text-xs font-bold hover:bg-amber-900 transition disabled:opacity-30 disabled:pointer-events-none">Berikutnya <i class="fa-solid fa-arrow-right ml-1"></i></button>
+  </div>
+ </div>
+</div>
+</main>
+
+<div id="boom" onclick="this.classList.remove('show')">
+ <div class="text-center space-y-2 p-4">
+  <img id="boomImg" src="https://media.tenor.com/oT6s6zOeo9IAAAAi/volcano-joypixels.gif" class="w-60 mx-auto drop-shadow-[0_0_40px_#ff4500]">
+  <div id="boomTx" class="f-title font-black text-3xl shine mt-2"></div>
+  <p class="text-xs text-amber-200">Klik di mana saja untuk menutup</p>
+ </div>
+</div>
+
+<div id="toast"></div>
+<div id="modal" class="fixed inset-0 z-[95] bg-black/90 backdrop-blur-md hidden items-center justify-center p-4" onclick="closeModal()">
+ <img id="mimg" class="max-h-[85vh] rounded-xl border-2 border-orange-500">
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+import { getFirestore, collection, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+const appId = typeof __app_id !== 'undefined' ? __app_id : 'elemental-arena-app';
+const cfg = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : { apiKey: "AIzaSyDummyKeyForTestingPurposeOnly", authDomain: "dummy.firebaseapp.com", projectId: "dummy-project", storageBucket: "dummy.appspot.com", messagingSenderId: "123456789", appId: "1:123456789:web:abcdef" };
+
+const app = initializeApp(cfg);
+const auth = getAuth(app);
+const db = getFirestore(app);
+let user = null;
+
+const esc = s => String(s || '').replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m]));
+const col = () => collection(db, 'artifacts', appId, 'public', 'data', 'reviews');
+
+(async () => {
+  try {
+    user = (typeof __initial_auth_token !== 'undefined' && __initial_auth_token ? await signInWithCustomToken(auth, __initial_auth_token) : await signInAnonymously(auth)).user;
+    onSnapshot(col(), s => {
+      const L = [];
+      let t = 0;
+      s.forEach(d => {
+        const x = d.data();
+        L.push(x);
+        t += Number(x.rating) || 0;
+      });
+      L.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+      document.getElementById('feed').innerHTML = L.length ? L.map(i => {
+        const r = Math.min(5, Math.max(0, +i.rating || 0));
+        return `<div class="bg-black/60 border border-orange-500/20 p-2.5 rounded-xl text-xs space-y-1"><div class="flex justify-between"><b class="text-amber-300"><i class="fa-solid fa-hat-wizard text-orange-500 mr-1"></i>${esc(i.name)}</b><span class="text-amber-400">${'★'.repeat(r)}</span></div><p class="text-stone-300">${esc(i.message)}</p></div>`;
+      }).join('') : '<p class="text-xs text-stone-500 italic text-center py-4">Belum ada ulasan.</p>';
+      
+      const a = L.length ? t / L.length : 0, rd = Math.round(a);
+      document.getElementById('an').textContent = a.toFixed(1);
+      document.getElementById('ac').textContent = L.length + ' Ulasan';
+      document.getElementById('as').textContent = '★'.repeat(rd) + '☆'.repeat(5 - rd);
+    }, e => console.error(e));
+  } catch (e) { console.warn('Firebase Auth fallback:', e); }
+})();
+
+window.submitReview = async e => {
+  e.preventDefault();
+  if (!window.selectedRating) return toast('Beri rating bintang dulu ⭐');
+  const b = document.getElementById('rb');
+  try {
+    b.disabled = true;
+    b.textContent = 'Memproses...';
+    if (user) await addDoc(col(), {
+      name: rn.value.trim() || 'Alchemist Anonim',
+      rating: window.selectedRating,
+      message: rm.value.trim(),
+      timestamp: Date.now(),
+      userId: user.uid
+    });
+    rn.value = '';
+    rm.value = '';
+    setStars(0);
+    playSound('success');
+    toast('Ulasan terkirim ke Grimoire ✨');
+  } catch (x) {
+    console.error(x);
+    toast('Gagal mengirim ulasan');
+  } finally {
+    b.disabled = false;
+    b.innerHTML = '<i class="fa-solid fa-paper-plane mr-1"></i> Kirim Ulasan';
+  }
+};
+</script>
+
+<script>
+/* ===== DATA PERMAINAN ===== */
+const ELEMENTS = [
+  { sym: 'H', name: 'Hidrogen', qty: 12, type: 'Gas Reaktif', cls: 'bg-pink-950 text-pink-300 border-pink-500/50' },
+  { sym: 'O', name: 'Oksigen', qty: 12, type: 'Gas Reaktif', cls: 'bg-cyan-950 text-cyan-300 border-cyan-500/50' },
+  { sym: 'C', name: 'Karbon', qty: 10, type: 'Non-Logam', cls: 'bg-stone-900 text-stone-300 border-stone-500/50' },
+  { sym: 'Na', name: 'Natrium', qty: 8, type: 'Alkali', cls: 'bg-yellow-950 text-yellow-300 border-yellow-500/50' },
+  { sym: 'Cl', name: 'Klorin', qty: 8, type: 'Halogen', cls: 'bg-emerald-950 text-emerald-300 border-emerald-500/50' },
+  { sym: 'Fe', name: 'Besi', qty: 6, type: 'Logam', cls: 'bg-slate-900 text-slate-300 border-slate-500/50' },
+  { sym: 'S', name: 'Belerang', qty: 4, type: 'Non-Logam', cls: 'bg-amber-950 text-amber-300 border-amber-500/50' },
+  { sym: 'He', name: 'Helium', qty: 4, type: 'Gas Mulia', cls: 'bg-orange-950 text-orange-300 border-orange-500/50' },
+  { sym: 'Ar', name: 'Argon', qty: 4, type: 'Gas Mulia', cls: 'bg-purple-950 text-purple-300 border-purple-500/50' }
+];
+
+const REACTIONS = [
+  { name: "Ledakan Sodium", energy: 2, req: { Na: 1, H: 1 }, desc: "6 Damage instan + Hancurkan Shield lawan" },
+  { name: "Gas Beracun Klorin", energy: 1, req: { Cl: 2 }, desc: "3 Damage instan (Abaikan/Tembus Shield)" },
+  { name: "Pembakaran Metana", energy: 2, req: { C: 1, H: 2 }, desc: "8 Damage instan" },
+  { name: "Hujan Asam", energy: 2, req: { S: 1, O: 1, H: 1 }, desc: "4 Damage ke SEMUA lawan sekaligus (AOE)" },
+  { name: "Reaksi Garam Dapur", energy: 1, req: { Na: 1, Cl: 1 }, desc: "Restorasi +4 HP diri sendiri" },
+  { name: "Reaksi Beku Shock", energy: 1, req: { H: 1, O: 1, He: 1 }, desc: "3 Damage + Lawan kehilangan 1 Energi di turn depan" },
+  { name: "Korosi Karat Cepat", energy: 1, req: { Fe: 1, O: 2 }, desc: "Hancurkan seluruh Shield lawan secara permanen" },
+  { name: "Super Plasma Blast", energy: 3, req: { C: 1, O: 1 }, desc: "12 Damage fatal (Reaksi Pamungkas)" }
+];
+
+const VOLCANO = "https://media.tenor.com/oT6s6zOeo9IAAAAi/volcano-joypixels.gif";
+const CAT = "https://media.tenor.com/lXMg2FMhfhQAAAAi/pusheen-harry-potter.gif";
+
+const $ = id => document.getElementById(id);
+let cur = 1, cauldron = {}, audioOn = true;
+window.selectedRating = 0;
+
+/* ===== Komponen Header/Footer Halaman ===== */
+document.querySelectorAll('hd').forEach(h => {
+  const d = h.getAttribute('d');
+  h.outerHTML = `<div class="flex items-center justify-between border-b ${d ? 'border-orange-500/30' : 'border-amber-900/30'} pb-2"><span class="f-med text-[11px] font-bold ${d ? 'text-orange-400' : 'text-amber-900'} tracking-widest">⚡ ${h.getAttribute('t')}</span><span class="f-title font-bold ${d ? 'text-amber-400' : 'text-amber-900'}">${h.getAttribute('s')}</span></div>`;
+});
+document.querySelectorAll('ft').forEach(f => {
+  const d = f.getAttribute('d');
+  f.outerHTML = `<div class="pt-4 border-t ${d ? 'border-orange-500/30 text-stone-400' : 'border-amber-900/30 text-amber-900/80'} flex justify-between text-xs"><span>${f.getAttribute('t')}</span><span class="font-mono">Hal. ${f.getAttribute('n')}</span></div>`;
+});
+
+/* ===== SFX Audio Engine ===== */
+const AC = new (window.AudioContext || window.webkitAudioContext)();
+function playSound(type) {
+  if (!audioOn) return;
+  if (AC.state === 'suspended') AC.resume();
+  const o = AC.createOscillator(), g = AC.createGain(), n = AC.currentTime;
+  o.connect(g); g.connect(AC.destination);
+
+  if (type === 'page') {
+    o.type = 'triangle';
+    o.frequency.setValueAtTime(320, n);
+    o.frequency.exponentialRampToValueAtTime(120, n + 0.15);
+    g.gain.setValueAtTime(0.15, n);
+    g.gain.exponentialRampToValueAtTime(0.01, n + 0.15);
+    o.start(); o.stop(n + 0.15);
+  } else if (type === 'boom') {
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(180, n);
+    o.frequency.exponentialRampToValueAtTime(30, n + 0.4);
+    g.gain.setValueAtTime(0.4, n);
+    g.gain.exponentialRampToValueAtTime(0.01, n + 0.4);
+    o.start(); o.stop(n + 0.4);
+  } else if (type === 'success') {
+    o.type = 'sine';
+    o.frequency.setValueAtTime(440, n);
+    o.frequency.exponentialRampToValueAtTime(880, n + 0.2);
+    g.gain.setValueAtTime(0.2, n);
+    g.gain.exponentialRampToValueAtTime(0.01, n + 0.2);
+    o.start(); o.stop(n + 0.2);
+  }
+}
+window.playSound = playSound;
+window.toggleAudio = () => {
+  audioOn = !audioOn;
+  aic.className = audioOn ? 'fa-solid fa-volume-high mr-1' : 'fa-solid fa-volume-xmark mr-1';
+  atx.textContent = 'SFX: ' + (audioOn ? 'ON' : 'OFF');
+};
+
+let tt;
+window.toast = m => {
+  const t = $('toast');
+  t.textContent = m;
+  t.classList.add('show');
+  clearTimeout(tt);
+  tt = setTimeout(() => t.classList.remove('show'), 2600);
+};
+
+/* ===== Navigasi Tabs & Lembaran ===== */
+const TABS = [
+  ['fa-feather', 'Overview'],
+  ['fa-cubes', 'Unsur (68)'],
+  ['fa-scroll', 'Resep (' + REACTIONS.length + ')'],
+  ['fa-flask', 'Lab Reaksi'],
+  ['fa-compass', 'Rulebook'],
+  ['fa-star', 'Rating'],
+  ['fa-heart', 'Support Us']
+];
+
+$('tabs').innerHTML = TABS.map((t, i) => `<button onclick="goToSpread(${i + 1})" id="tab-${i + 1}" class="tab px-3 py-2 f-med text-xs font-bold rounded-r-lg shadow-lg flex items-center gap-2"><i class="fa-solid ${t[0]}"></i><span>${t[1]}</span></button>`).join('');
+
+function render() {
+  document.querySelectorAll('#stage section').forEach(s => {
+    const on = +s.dataset.s === cur;
+    s.classList.toggle('hidden', !on);
+    s.classList.toggle('flex', on);
+    if (on) { s.style.animation = 'none'; s.offsetHeight; s.style.animation = ''; }
+  });
+  for (let i = 1; i <= 7; i++) {
+    const el = $('tab-' + i);
+    if (el) el.classList.toggle('on', i === cur);
+  }
+  bp.disabled = cur === 1;
+  bn.disabled = cur === 7;
+  $('ind').textContent = `Lembar ${['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'][cur - 1]} / VII`;
+}
+
+window.goToSpread = n => { if (n === cur) return; playSound('page'); cur = n; render(); document.querySelector('.book').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+window.nextSpread = () => { if (cur < 7) { playSound('page'); cur++; render(); } };
+window.prevSpread = () => { if (cur > 1) { playSound('page'); cur--; render(); } };
+
+addEventListener('keydown', e => {
+  if (/INPUT|TEXTAREA/.test(document.activeElement.tagName)) return;
+  if (e.key === 'ArrowRight') nextSpread();
+  if (e.key === 'ArrowLeft') prevSpread();
+});
+
+/* ===== Render Katalog & Resep ===== */
+$('elList').innerHTML = ELEMENTS.map(e => `<div class="el ${e.cls} border p-2 rounded-xl flex items-center gap-2"><span class="f-title text-xl font-black w-8 text-center">${e.sym}</span><div><div class="font-bold">${e.name}</div><div class="text-[10px] opacity-80">${e.qty} Kartu • ${e.type}</div></div></div>`).join('');
+
+const rc = r => `<div class="card p-2.5 space-y-1"><div class="flex justify-between items-center"><b>${r.name}</b><span class="px-2 rounded bg-amber-900 text-amber-100 text-[10px] font-bold">${r.energy} E</span></div><p class="text-[11px]">${r.desc}</p><div class="flex gap-1 flex-wrap">${Object.entries(r.req).map(([s, q]) => `<span class="text-[10px] font-mono px-1.5 rounded bg-amber-900/15 text-amber-900">${q}×${s}</span>`).join('')}</div></div>`;
+const half = Math.ceil(REACTIONS.length / 2);
+$('rcL').innerHTML = REACTIONS.slice(0, half).map(rc).join('');$('rcR').innerHTML = REACTIONS.slice(half).map(rc).join('');
+
+/* ===== Cauldron Simulator Engine ===== */
+$('pick').innerHTML = ELEMENTS.map(e => `<button onclick="addCauldron('${e.sym}')" class="el ${e.cls} border p-2 rounded-xl flex flex-col items-center"><span class="f-title text-base font-black">${e.sym}</span><span class="text-[8px] uppercase">${e.name}</span></button>`).join('');
+
+function updCauldron() {
+  const total = Object.values(cauldron).reduce((a, b) => a + b, 0);
+  $('cc').textContent = total + ' Unsur';$('cd').innerHTML = total ? Object.entries(cauldron).map(([s, q]) => `<span class="px-2 py-0.5 rounded-lg bg-orange-950 border border-orange-500/40 text-xs font-bold text-amber-300 flex items-center gap-1">${s}<span class="bg-orange-500 text-black px-1 rounded-full text-[9px]">${q}</span><button onclick="removeCauldron('${s}')" class="text-red-400 hover:text-white">×</button></span>`).join('') : '<span class="text-xs text-stone-500 italic">Pilih unsur dari halaman kiri...</span>';
+}
+
+window.addCauldron = s => { playSound('page'); cauldron[s] = (cauldron[s] || 0) + 1; updCauldron(); };
+window.removeCauldron = s => { playSound('page'); if (--cauldron[s] <= 0) delete cauldron[s]; updCauldron(); };
+window.resetCauldron = () => { playSound('page'); cauldron = {}; updCauldron(); $('out').classList.add('hidden');$('brewing').classList.add('hidden'); };
+
+window.synthesizeSpell = () => {
+  const total = Object.values(cauldron).reduce((a, b) => a + b, 0);
+  if (!total) return toast('Pilih unsur terlebih dahulu!');
+
+  $('out').classList.add('hidden');$('brewing').classList.remove('hidden');
+
+  setTimeout(() => {
+    $('brewing').classList.add('hidden');
+    const match = REACTIONS.filter(r => Object.entries(r.req).every(([s, q]) => (cauldron[s] || 0) >= q)).sort((a, b) => Object.values(b.req).reduce((x, y) => x + y) - Object.values(a.req).reduce((x, y) => x + y) || b.energy - a.energy)[0];
+
+    $('out').classList.remove('hidden');
+    if (match) {
+      playSound('success');
+      $('boomImg').src = VOLCANO;
+      $('boomTx').textContent = match.name;
+      $('oi').textContent = '⚡';$('ot').textContent = match.name;
+      $('od').textContent = match.desc;
+      $('orc').textContent = `Formula Terpenuhi! [Biaya: ${match.energy} Energi]`;
+    } else {
+      playSound('boom');
+      document.body.classList.add('shake');
+      setTimeout(() => document.body.classList.remove('shake'), 500);
+
+      $('boomImg').src = VOLCANO;
+      $('boomTx').textContent = 'REAKSI GAGAL / MELEDAK!';$('oi').textContent = '💥';
+      $('ot').textContent = 'REAKSI GAGAL / MELEDAK!';
+      $('od').textContent = 'Kombinasi unsur di kawah tidak cocok dengan resep yang ada.';$('orc').textContent = 'Kombinasi meledak tanpa merakit reaksi berdaya guna.';
+    }
+
+    $('boom').classList.add('show');
+    setTimeout(() => $('boom').classList.remove('show'), 2500);
+  }, 1200);
+};
+
+/* ===== Rating & Modal ===== */
+window.setStars = r => {
+  playSound('page');
+  window.selectedRating = r;
+  document.querySelectorAll('.sb').forEach((b, i) => b.classList.toggle('text-amber-400', i < r));
+  $('st').textContent = r + ' Bintang';
+};
+
+window.openModal = id => {
+  $('mimg').src =$(id).src;
+  $('modal').classList.replace('hidden', 'flex');
+};
+window.closeModal = () => $('modal').classList.replace('flex', 'hidden');
+
+/* ===== Efek Background Partikel Api ===== */
+(function() {
+  const c = $('sparks'), x = c.getContext('2d');
+  let w, h;
+  const rs = () => { w = c.width = innerWidth; h = c.height = innerHeight; };
+  rs(); addEventListener('resize', rs);
+  const P = Array.from({ length: 65 }, () => ({
+    x: Math.random() * innerWidth,
+    y: Math.random() * innerHeight,
+    s: Math.random() * 2.2 + 0.6,
+    v: Math.random() * 0.9 + 0.25,
+    a: Math.random() * 0.8 + 0.2,
+    d: Math.random() * Math.PI * 2,
+    hue: Math.random() < 0.3 ? 190 : 28
+  }));
+  (function f() {
+    x.clearRect(0, 0, w, h);
+    P.forEach(p => {
+      p.y -= p.v; p.d += 0.02; p.x += Math.sin(p.d) * 0.5;
+      if (p.y < -5) { p.y = h + 5; p.x = Math.random() * w; }
+      x.fillStyle = `hsla(${p.hue},100%,60%,${p.a})`;
+      x.shadowColor = `hsl(${p.hue},100%,50%)`;
+      x.shadowBlur = 8;
+      x.beginPath(); x.arc(p.x, p.y, p.s, 0, 6.283); x.fill();
+    });
+    requestAnimationFrame(f);
+  })();
+})();
+
+render();
+</script>
+</body>
+</html>
