@@ -9,209 +9,49 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=MedievalSharp&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-@font-face {
-  font-family: 'Lifecraft';
-  src: url('https://fonts.cdnfonts.com/s/14107/Lifecraft.woff') format('woff');
-  font-weight: normal;
-  font-style: normal;
-}
-
-:root {
-  --gold: #dfac40;
-  --gold2: #fbe29a;
-  --rune: #ff4500;
-  --ink: #2a1a12;
-}
-
-* { -webkit-tap-highlight-color: transparent; }
-
-body {
-  background: radial-gradient(ellipse at 50% 0%, #3a0f06 0%, #120504 45%, #050202 100%) fixed;
-  color: #f3e5c8;
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  overflow-x: hidden;
-  user-select: none;
-}
-
-.f-title { font-family: 'Lifecraft', 'Cinzel Decorative', 'MedievalSharp', serif; }
-.f-med { font-family: 'MedievalSharp', serif; }
-
-.shine {
-  background: linear-gradient(90deg, #b8741a, #fbe29a, #ff7a1a, #fbe29a, #b8741a);
-  background-size: 250% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: shine 5s linear infinite;
-  filter: drop-shadow(0 0 14px rgba(255, 100, 0, 0.55));
-}
-@keyframes shine { to { background-position: -250% 0; } }
-
-/* HERO */
-.hero {
-  position: relative;
-  border-radius: 1.5rem;
-  overflow: hidden;
-  border: 2px solid rgba(223, 172, 64, 0.45);
-  background: linear-gradient(180deg, #1b0a06, #3b0e05 70%, #7a1d05);
-  box-shadow: 0 0 50px rgba(255, 69, 0, 0.35), inset 0 -40px 80px rgba(255, 90, 0, 0.35);
-}
-.hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(115deg, transparent 0 22px, rgba(255, 255, 255, 0.025) 22px 24px);
-  pointer-events: none;
-}
-.hero .lava {
-  position: absolute;
-  left: 0; right: 0; bottom: 0;
-  height: 34px;
-  background: linear-gradient(90deg, #ff3d00, #ffb300, #ff3d00);
-  background-size: 200% 100%;
-  animation: lava 4s linear infinite;
-  filter: blur(14px);
-  opacity: 0.75;
-}
-@keyframes lava { to { background-position: 200% 0; } }
-
-/* Kucing terbang di atas layar */
-.fly-cat {
-  position: fixed;
-  top: 12%;
-  left: -160px;
-  width: 110px;
-  z-index: 45;
-  pointer-events: none;
-  filter: drop-shadow(0 6px 10px rgba(0,0,0,0.7));
-  animation: fly 22s linear infinite;
-}
-@keyframes fly {
-  0% { transform: translate(0, 0) rotate(-6deg); }
-  25% { transform: translate(30vw, -30px) rotate(4deg); }
-  50% { transform: translate(60vw, 40px) rotate(-5deg); }
-  75% { transform: translate(90vw, -20px) rotate(5deg); }
-  100% { transform: translate(calc(100vw + 200px), 10px) rotate(-4deg); }
-}
-
-/* BUKU */
-.book {
-  background: linear-gradient(145deg, #2a120c, #120604);
-  border: 3px solid transparent;
-  border-radius: 1.6rem;
-  position: relative;
-  box-shadow: 0 30px 70px rgba(0,0,0,0.9), 0 0 50px rgba(255,69,0,0.25);
-  background-clip: padding-box;
-}
-.book::before {
-  content: "";
-  position: absolute;
-  inset: -3px;
-  border-radius: inherit;
-  z-index: -1;
-  background: linear-gradient(120deg, #8a5a12, #fbe29a, #b8741a, #ff7a1a, #fbe29a, #8a5a12);
-  background-size: 300% 300%;
-  animation: lava 8s linear infinite;
-}
-.parchment {
-  background: radial-gradient(circle at 30% 20%, rgba(139,69,19,0.1), transparent 60%), radial-gradient(circle, transparent 60%, rgba(60,25,10,0.35)), #f3e5c8;
-  box-shadow: inset 0 0 55px rgba(74,38,14,0.35);
-  color: var(--ink);
-}
-.dark {
-  background: radial-gradient(circle at 50% 0, rgba(255,69,0,0.14), transparent 70%), #160b08;
-  box-shadow: inset 0 0 60px #000;
-  color: #f3e5c8;
-}
-.spine { background: linear-gradient(90deg, transparent, rgba(0,0,0,0.55), transparent); }
-
-.page { animation: pg .55s cubic-bezier(.2,.8,.2,1) both; }
-.page.r { animation-name: pgr; }
-@keyframes pg { from { opacity: 0; transform: perspective(1200px) rotateY(14deg) translateX(-18px); } }
-@keyframes pgr { from { opacity: 0; transform: perspective(1200px) rotateY(-14deg) translateX(18px); } }
-
-.card {
-  background: rgba(120,60,20,0.09);
-  border: 1px solid rgba(120,60,20,0.3);
-  border-radius: .9rem;
-  transition: .25s;
-}
-.card:hover {
-  transform: translateY(-3px) rotate(-.4deg);
-  box-shadow: 0 8px 18px rgba(80,30,5,0.3);
-  border-color: #b8741a;
-}
-.el { transition: transform .25s, box-shadow .25s; }
-.el:hover { transform: translateY(-4px) scale(1.05) rotateX(8deg); box-shadow: 0 0 18px currentColor; }
-
-/* Tab */
-.tab {
-  clip-path: polygon(0 0, 100% 0, 88% 100%, 0 100%);
-  transition: .25s;
-  background: #1c1210;
-  color: #cbbba0;
-  border-left: 4px solid #5c4a3a;
-}
-.tab:hover { transform: translateX(6px); color: #fbe29a; }
-.tab.on {
-  background: linear-gradient(90deg, #b8741a, #ff6a1a);
-  color: #2a0c02;
-  border-left-color: #fbe29a;
-  box-shadow: 0 0 18px rgba(255,106,26,0.6);
-}
-
-/* Tombol */
-.btn-fire {
-  background: linear-gradient(90deg, #ff4500, #ff9d00, #ff4500);
-  background-size: 200% 100%;
-  animation: lava 3s linear infinite;
-  box-shadow: 0 0 24px rgba(255,90,0,0.6);
-  transition: .2s;
-}
-.btn-fire:hover { transform: scale(1.03); }
-.btn-fire:active { transform: scale(.97); }
-
-.shake { animation: shake .5s; }
-@keyframes shake {
-  20% { transform: translate(-6px, 3px); }
-  40% { transform: translate(6px, -4px); }
-  60% { transform: translate(-4px, -3px); }
-  80% { transform: translate(4px, 3px); }
-}
-
-#toast {
-  position: fixed;
-  bottom: 22px;
-  left: 50%;
-  transform: translate(-50%, 120px);
-  background: #1c0d08;
-  border: 1px solid var(--gold);
-  color: var(--gold2);
-  padding: .7rem 1.2rem;
-  border-radius: 999px;
-  z-index: 90;
-  transition: .4s;
-  box-shadow: 0 0 22px rgba(255,140,0,0.45);
-  font-size: .8rem;
-  font-weight: 700;
-}
-#toast.show { transform: translate(-50%, 0); }
-
-#boom {
-  position: fixed;
-  inset: 0;
-  z-index: 80;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  background: radial-gradient(circle, rgba(255,80,0,0.55), rgba(0,0,0,0.92));
-  backdrop-filter: blur(4px);
-}
-#boom.show { display: flex; animation: fade .3s; }
-@keyframes fade { from { opacity: 0; } }
-
-.sw::-webkit-scrollbar { width: 6px; }
-.sw::-webkit-scrollbar-thumb { background: #8b4513; border-radius: 4px; }
+@font-face{font-family:'Lifecraft';src:url('https://fonts.cdnfonts.com/s/14107/Lifecraft.woff') format('woff');font-weight:normal;font-style:normal}
+:root{--gold:#dfac40;--gold2:#fbe29a;--rune:#ff4500;--ink:#2a1a12}
+*{-webkit-tap-highlight-color:transparent}
+body{background:radial-gradient(ellipse at 50% 0%,#3a0f06 0%,#120504 45%,#050202 100%) fixed;color:#f3e5c8;font-family:'Plus Jakarta Sans',sans-serif;overflow-x:hidden;user-select:none}
+.f-title{font-family:'Lifecraft','Cinzel Decorative','MedievalSharp',serif}
+.f-med{font-family:'MedievalSharp',serif}
+.shine{background:linear-gradient(90deg,#b8741a,#fbe29a,#ff7a1a,#fbe29a,#b8741a);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 5s linear infinite;filter:drop-shadow(0 0 14px rgba(255,100,0,.55))}
+@keyframes shine{to{background-position:-250% 0}}
+.hero{position:relative;border-radius:1.5rem;overflow:hidden;border:2px solid rgba(223,172,64,.45);background:linear-gradient(180deg,#1b0a06,#3b0e05 70%,#7a1d05);box-shadow:0 0 50px rgba(255,69,0,.35),inset 0 -40px 80px rgba(255,90,0,.35)}
+.hero::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(115deg,transparent 0 22px,rgba(255,255,255,.025) 22px 24px);pointer-events:none}
+.hero .lava{position:absolute;left:0;right:0;bottom:0;height:34px;background:linear-gradient(90deg,#ff3d00,#ffb300,#ff3d00);background-size:200% 100%;animation:lava 4s linear infinite;filter:blur(14px);opacity:.75}
+@keyframes lava{to{background-position:200% 0}}
+.fly-cat{position:fixed;top:12%;left:-160px;width:110px;z-index:45;pointer-events:none;filter:drop-shadow(0 6px 10px rgba(0,0,0,.7));animation:fly 22s linear infinite}
+@keyframes fly{0%{transform:translate(0,0) rotate(-6deg)}25%{transform:translate(30vw,-30px) rotate(4deg)}50%{transform:translate(60vw,40px) rotate(-5deg)}75%{transform:translate(90vw,-20px) rotate(5deg)}100%{transform:translate(calc(100vw + 200px),10px) rotate(-4deg)}}
+.book{background:linear-gradient(145deg,#2a120c,#120604);border:3px solid transparent;border-radius:1.6rem;position:relative;box-shadow:0 30px 70px rgba(0,0,0,.9),0 0 50px rgba(255,69,0,.25);background-clip:padding-box}
+.book::before{content:"";position:absolute;inset:-3px;border-radius:inherit;z-index:-1;background:linear-gradient(120deg,#8a5a12,#fbe29a,#b8741a,#ff7a1a,#fbe29a,#8a5a12);background-size:300% 300%;animation:lava 8s linear infinite}
+.parchment{background:radial-gradient(circle at 30% 20%,rgba(139,69,19,.1),transparent 60%),radial-gradient(circle,transparent 60%,rgba(60,25,10,.35)),#f3e5c8;box-shadow:inset 0 0 55px rgba(74,38,14,.35);color:var(--ink)}
+.dark{background:radial-gradient(circle at 50% 0,rgba(255,69,0,.14),transparent 70%),#160b08;box-shadow:inset 0 0 60px #000;color:#f3e5c8}
+.spine{background:linear-gradient(90deg,transparent,rgba(0,0,0,.55),transparent)}
+.page{animation:pg .55s cubic-bezier(.2,.8,.2,1) both}
+.page.r{animation-name:pgr}
+@keyframes pg{from{opacity:0;transform:perspective(1200px) rotateY(14deg) translateX(-18px)}}
+@keyframes pgr{from{opacity:0;transform:perspective(1200px) rotateY(-14deg) translateX(18px)}}
+.card{background:rgba(120,60,20,.09);border:1px solid rgba(120,60,20,.3);border-radius:.9rem;transition:.25s}
+.card:hover{transform:translateY(-3px) rotate(-.4deg);box-shadow:0 8px 18px rgba(80,30,5,.3);border-color:#b8741a}
+.el{transition:transform .25s,box-shadow .25s}
+.el:hover{transform:translateY(-4px) scale(1.05) rotateX(8deg);box-shadow:0 0 18px currentColor}
+.tab{clip-path:polygon(0 0,100% 0,88% 100%,0 100%);transition:.25s;background:#1c1210;color:#cbbba0;border-left:4px solid #5c4a3a}
+.tab:hover{transform:translateX(6px);color:#fbe29a}
+.tab.on{background:linear-gradient(90deg,#b8741a,#ff6a1a);color:#2a0c02;border-left-color:#fbe29a;box-shadow:0 0 18px rgba(255,106,26,.6)}
+.btn-fire{background:linear-gradient(90deg,#ff4500,#ff9d00,#ff4500);background-size:200% 100%;animation:lava 3s linear infinite;box-shadow:0 0 24px rgba(255,90,0,.6);transition:.2s}
+.btn-fire:hover{transform:scale(1.03)}
+.btn-fire:active{transform:scale(.97)}
+.shake{animation:shake .5s}
+@keyframes shake{20%{transform:translate(-6px,3px)}40%{transform:translate(6px,-4px)}60%{transform:translate(-4px,-3px)}80%{transform:translate(4px,3px)}}
+#toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,120px);background:#1c0d08;border:1px solid var(--gold);color:var(--gold2);padding:.7rem 1.2rem;border-radius:999px;z-index:90;transition:.4s;box-shadow:0 0 22px rgba(255,140,0,.45);font-size:.8rem;font-weight:700}
+#toast.show{transform:translate(-50%,0)}
+#boom{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;background:radial-gradient(circle,rgba(255,80,0,.55),rgba(0,0,0,.92));backdrop-filter:blur(4px)}
+#boom.show{display:flex;animation:fade .3s}
+@keyframes fade{from{opacity:0}}
+.sw::-webkit-scrollbar{width:6px}
+.sw::-webkit-scrollbar-thumb{background:#8b4513;border-radius:4px}
+.progress{background:linear-gradient(90deg,#b8741a,#fbe29a);box-shadow:0 0 10px rgba(251,226,154,.6);transition:width .4s ease}
 </style>
 </head>
 <body class="min-h-screen">
@@ -219,8 +59,8 @@ body {
 <img class="fly-cat" src="https://media.tenor.com/lXMg2FMhfhQAAAAi/pusheen-harry-potter.gif" alt="Kucing terbang">
 <img class="fly-cat" src="https://media.tenor.com/lXMg2FMhfhQAAAAi/pusheen-harry-potter.gif" alt="Kucing terbang">
 
-<header class="sticky top-0 z-50 bg-black/80 backdrop-blur-md border-b border-amber-500/30 px-4 py-2.5">
- <div class="max-w-7xl mx-auto flex items-center justify-between">
+<header class="sticky top-0 z-50 bg-black/85 backdrop-blur-md border-b border-amber-500/30 px-4 py-2.5">
+ <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
   <div class="flex items-center gap-3">
    <img src="logo.png" onerror="this.onerror=null;this.src='https://media.tenor.com/oT6s6zOeo9IAAAAi/volcano-joypixels.gif'" class="w-10 h-10 object-contain drop-shadow-[0_0_8px_#ff4500]" alt="Logo Game">
    <div>
@@ -228,16 +68,18 @@ body {
     <span class="f-med text-[10px] text-orange-400 tracking-widest">REAKSI • GRIMOIRE WEB</span>
    </div>
   </div>
-  <div class="flex items-center gap-3">
-   <span class="hidden md:block text-xs font-mono text-amber-400/80"><i class="fa-solid fa-book-bookmark text-orange-500 mr-1"></i><span id="ind">Lembar I / VII</span></span>
+  <div class="flex items-center gap-2 sm:gap-3">
+   <div class="hidden md:flex flex-col items-end gap-1">
+    <span class="text-xs font-mono text-amber-400/80"><i class="fa-solid fa-book-bookmark text-orange-500 mr-1"></i><span id="ind">Lembar I / VII</span></span>
+    <div class="w-32 h-1.5 rounded-full bg-stone-800 overflow-hidden"><div id="pbar" class="progress h-full" style="width:14%"></div></div>
+   </div>
    <button onclick="toggleAudio()" class="px-3 py-1.5 rounded-xl bg-orange-950/60 border border-orange-500/40 text-amber-300 text-xs font-bold hover:bg-orange-900 transition"><i id="aic" class="fa-solid fa-volume-high mr-1"></i><span id="atx">SFX: ON</span></button>
   </div>
  </div>
 </header>
 
-<main class="relative z-10 max-w-6xl mx-auto px-2 sm:px-6 py-6 pb-24 space-y-6">
+<main class="relative z-10 max-w-6xl mx-auto px-2 sm:px-6 py-6 pb-6 space-y-6">
 
-<!-- HERO -->
 <section class="hero p-5 sm:p-8 grid md:grid-cols-[1fr_auto] gap-6 items-center">
  <div class="relative z-10 space-y-3">
   <span class="f-med text-xs text-amber-300 tracking-[.3em]">⚗️ BOARD GAME KIMIA • 2–4 PEMAIN</span>
@@ -262,7 +104,6 @@ body {
   <div class="hidden lg:block absolute left-1/2 top-4 bottom-16 w-14 -ml-7 spine z-20 pointer-events-none"></div>
   <div id="stage" class="relative grid grid-cols-1 lg:grid-cols-2 min-h-[640px] overflow-hidden rounded-2xl border-2 border-amber-900/60">
 
-   <!-- 1 -->
    <section data-s="1" class="page parchment p-5 sm:p-8 flex-col justify-between lg:border-r border-amber-900/40">
     <div class="space-y-4">
      <Hd t="HALAMAN 01 • PROLOG" s="Grimoire Utilitatis"></Hd>
@@ -302,7 +143,6 @@ body {
     <Ft t="Desain Grafis Master" n="02"></Ft>
    </section>
 
-   <!-- 2 -->
    <section data-s="2" class="page parchment p-5 sm:p-8 flex-col justify-between lg:border-r border-amber-900/40">
     <div class="space-y-4">
      <Hd t="HALAMAN 03 • KATALOG UNSUR" s="Amunisi Kimia"></Hd>
@@ -324,7 +164,6 @@ body {
     <Ft t="Modul Proteksi" n="04"></Ft>
    </section>
 
-   <!-- 3 -->
    <section data-s="3" class="page parchment p-5 sm:p-8 flex-col justify-between lg:border-r border-amber-900/40">
     <div class="space-y-4">
      <Hd t="HALAMAN 05 • GRIMOIRE RESEP" s="Pasar Reaksi"></Hd>
@@ -341,7 +180,6 @@ body {
     <Ft t="Formula Kimia II" n="06"></Ft>
    </section>
 
-   <!-- 4 -->
    <section data-s="4" class="page dark p-5 sm:p-8 flex-col justify-between lg:border-r border-amber-900/40">
     <div class="space-y-4">
      <Hd t="HALAMAN 07 • CAULDRON SIMULATOR" s="Pilih Unsur" d="1"></Hd>
@@ -375,7 +213,6 @@ body {
     <Ft t="Output Eksperimen" n="08" d="1"></Ft>
    </section>
 
-   <!-- 5 -->
    <section data-s="5" class="page parchment p-5 sm:p-8 flex-col justify-between lg:border-r border-amber-900/40">
     <div class="space-y-4">
      <Hd t="HALAMAN 09 • ALUR GILIRAN" s="3 Fase Turn"></Hd>
@@ -399,7 +236,6 @@ body {
     <Ft t="Sistem Pertempuran" n="10"></Ft>
    </section>
 
-   <!-- 6 -->
    <section data-s="6" class="page dark p-5 sm:p-8 flex-col justify-between lg:border-r border-amber-900/40">
     <div class="space-y-4">
      <Hd t="HALAMAN 11 • ULASAN PLAYER" s="Kirim Feedback" d="1"></Hd>
@@ -425,7 +261,6 @@ body {
     <Ft t="Komunitas Grimoire" n="12" d="1"></Ft>
    </section>
 
-   <!-- 7: SUPPORT US -->
    <section data-s="7" class="page parchment p-5 sm:p-8 flex-col justify-between lg:border-r border-amber-900/40">
     <div class="space-y-4">
      <Hd t="HALAMAN 13 • SUPPORT US" s="Dukung Pengembang"></Hd>
@@ -469,6 +304,32 @@ body {
   </div>
  </div>
 </div>
+
+<!-- FOOTER BARU -->
+<footer class="mt-8 border-t border-amber-500/30 bg-black/60 backdrop-blur rounded-2xl px-5 py-5">
+  <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+    <div class="flex items-center gap-3">
+      <img src="logo.png" onerror="this.onerror=null;this.src='https://media.tenor.com/oT6s6zOeo9IAAAAi/volcano-joypixels.gif'" class="w-9 h-9 object-contain drop-shadow-[0_0_8px_#ff4500]">
+      <div>
+        <p class="f-title font-black text-amber-300 text-sm leading-none">ELEMENTAL ARENA: REAKSI</p>
+        <p class="text-[10px] text-amber-500/80">Companion Web • Board Game Kimia Edukatif</p>
+      </div>
+    </div>
+    <nav class="flex flex-wrap justify-center gap-3 text-[11px] font-semibold text-amber-300/80">
+      <a href="#" onclick="goToSpread(1);return false" class="hover:text-amber-100 transition">Overview</a>
+      <a href="#" onclick="goToSpread(2);return false" class="hover:text-amber-100 transition">Unsur</a>
+      <a href="#" onclick="goToSpread(3);return false" class="hover:text-amber-100 transition">Resep</a>
+      <a href="#" onclick="goToSpread(4);return false" class="hover:text-amber-100 transition">Lab Cauldron</a>
+      <a href="#" onclick="goToSpread(5);return false" class="hover:text-amber-100 transition">Rulebook</a>
+      <a href="#" onclick="goToSpread(7);return false" class="hover:text-amber-100 transition">Support</a>
+    </nav>
+    <div class="text-[10px] text-amber-600/80 text-center md:text-right">
+      <p>&copy; Elemental Arena : Reaksi — Alchemist Lab</p>
+      <p>@syarl.id<p>
+      <p class="mt-0.5">Dibuat dengan <i class="fa-solid fa-heart text-red-500"></i> untuk edukasi kimia</p>
+    </div>
+  </div>
+</footer>
 </main>
 
 <div id="boom" onclick="this.classList.remove('show')">
@@ -555,7 +416,6 @@ window.submitReview = async e => {
 </script>
 
 <script>
-/* ===== DATA PERMAINAN ===== */
 const ELEMENTS = [
   { sym: 'H', name: 'Hidrogen', qty: 12, type: 'Gas Reaktif', cls: 'bg-pink-950 text-pink-300 border-pink-500/50' },
   { sym: 'O', name: 'Oksigen', qty: 12, type: 'Gas Reaktif', cls: 'bg-cyan-950 text-cyan-300 border-cyan-500/50' },
@@ -580,13 +440,12 @@ const REACTIONS = [
 ];
 
 const VOLCANO = "https://media.tenor.com/oT6s6zOeo9IAAAAi/volcano-joypixels.gif";
-const CAT = "https://media.tenor.com/lXMg2FMhfhQAAAAi/pusheen-harry-potter.gif";
+const POTION = "https://media.tenor.com/sB-KP5ihwDYAAAAi/po%C3%A7%C3%A3o-de-imagem.gif";
 
 const $ = id => document.getElementById(id);
 let cur = 1, cauldron = {}, audioOn = true;
 window.selectedRating = 0;
 
-/* ===== Komponen Header/Footer Halaman ===== */
 document.querySelectorAll('hd').forEach(h => {
   const d = h.getAttribute('d');
   h.outerHTML = `<div class="flex items-center justify-between border-b ${d ? 'border-orange-500/30' : 'border-amber-900/30'} pb-2"><span class="f-med text-[11px] font-bold ${d ? 'text-orange-400' : 'text-amber-900'} tracking-widest">⚡ ${h.getAttribute('t')}</span><span class="f-title font-bold ${d ? 'text-amber-400' : 'text-amber-900'}">${h.getAttribute('s')}</span></div>`;
@@ -596,35 +455,71 @@ document.querySelectorAll('ft').forEach(f => {
   f.outerHTML = `<div class="pt-4 border-t ${d ? 'border-orange-500/30 text-stone-400' : 'border-amber-900/30 text-amber-900/80'} flex justify-between text-xs"><span>${f.getAttribute('t')}</span><span class="font-mono">Hal. ${f.getAttribute('n')}</span></div>`;
 });
 
-/* ===== SFX Audio Engine ===== */
+/* ===== SFX ENGINE BARU ===== */
 const AC = new (window.AudioContext || window.webkitAudioContext)();
 function playSound(type) {
   if (!audioOn) return;
   if (AC.state === 'suspended') AC.resume();
-  const o = AC.createOscillator(), g = AC.createGain(), n = AC.currentTime;
-  o.connect(g); g.connect(AC.destination);
+  const n = AC.currentTime;
 
   if (type === 'page') {
-    o.type = 'triangle';
-    o.frequency.setValueAtTime(320, n);
-    o.frequency.exponentialRampToValueAtTime(120, n + 0.15);
-    g.gain.setValueAtTime(0.15, n);
-    g.gain.exponentialRampToValueAtTime(0.01, n + 0.15);
-    o.start(); o.stop(n + 0.15);
+    // Efek buka lembar buku: noise gesek + denyut rendah
+    const bufferSize = AC.sampleRate * 0.12;
+    const buffer = AC.createBuffer(1, bufferSize, AC.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / bufferSize, 2);
+    }
+    const noise = AC.createBufferSource();
+    noise.buffer = buffer;
+    const bp = AC.createBiquadFilter();
+    bp.type = 'bandpass'; bp.frequency.value = 1200; bp.Q.value = 0.8;
+    const ng = AC.createGain();
+    ng.gain.setValueAtTime(0.25, n);
+    ng.gain.exponentialRampToValueAtTime(0.001, n + 0.12);
+    noise.connect(bp).connect(ng).connect(AC.destination);
+    noise.start(n);
+
+    const o2 = AC.createOscillator(), g2 = AC.createGain();
+    o2.type = 'sine';
+    o2.frequency.setValueAtTime(120, n);
+    o2.frequency.exponentialRampToValueAtTime(60, n + 0.16);
+    g2.gain.setValueAtTime(0.12, n);
+    g2.gain.exponentialRampToValueAtTime(0.001, n + 0.16);
+    o2.connect(g2).connect(AC.destination);
+    o2.start(n); o2.stop(n + 0.16);
+
+  } else if (type === 'success') {
+    // Arpeggio ceria 3 nada untuk reaksi cocok
+    [523.25, 659.25, 783.99].forEach((freq, i) => {
+      const o = AC.createOscillator(), g = AC.createGain();
+      o.type = 'triangle';
+      o.frequency.value = freq;
+      const t = n + i * 0.09;
+      g.gain.setValueAtTime(0.001, t);
+      g.gain.exponentialRampToValueAtTime(0.18, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+      o.connect(g).connect(AC.destination);
+      o.start(t); o.stop(t + 0.3);
+    });
+    const shimmer = AC.createOscillator(), sg = AC.createGain();
+    shimmer.type = 'sine';
+    shimmer.frequency.setValueAtTime(1568, n + 0.15);
+    shimmer.frequency.exponentialRampToValueAtTime(2093, n + 0.45);
+    sg.gain.setValueAtTime(0.06, n + 0.15);
+    sg.gain.exponentialRampToValueAtTime(0.001, n + 0.5);
+    shimmer.connect(sg).connect(AC.destination);
+    shimmer.start(n + 0.15); shimmer.stop(n + 0.5);
+
   } else if (type === 'boom') {
+    const o = AC.createOscillator(), g = AC.createGain();
     o.type = 'sawtooth';
     o.frequency.setValueAtTime(180, n);
     o.frequency.exponentialRampToValueAtTime(30, n + 0.4);
-    g.gain.setValueAtTime(0.4, n);
-    g.gain.exponentialRampToValueAtTime(0.01, n + 0.4);
+    g.gain.setValueAtTime(0.35, n);
+    g.gain.exponentialRampToValueAtTime(0.001, n + 0.4);
+    o.connect(g).connect(AC.destination);
     o.start(); o.stop(n + 0.4);
-  } else if (type === 'success') {
-    o.type = 'sine';
-    o.frequency.setValueAtTime(440, n);
-    o.frequency.exponentialRampToValueAtTime(880, n + 0.2);
-    g.gain.setValueAtTime(0.2, n);
-    g.gain.exponentialRampToValueAtTime(0.01, n + 0.2);
-    o.start(); o.stop(n + 0.2);
   }
 }
 window.playSound = playSound;
@@ -643,7 +538,6 @@ window.toast = m => {
   tt = setTimeout(() => t.classList.remove('show'), 2600);
 };
 
-/* ===== Navigasi Tabs & Lembaran ===== */
 const TABS = [
   ['fa-feather', 'Overview'],
   ['fa-cubes', 'Unsur (68)'],
@@ -670,6 +564,7 @@ function render() {
   bp.disabled = cur === 1;
   bn.disabled = cur === 7;
   $('ind').textContent = `Lembar ${['I', 'II', 'III', 'IV', 'V', 'VI', 'VII'][cur - 1]} / VII`;
+  $('pbar').style.width = ((cur / 7) * 100) + '%';
 }
 
 window.goToSpread = n => { if (n === cur) return; playSound('page'); cur = n; render(); document.querySelector('.book').scrollIntoView({ behavior: 'smooth', block: 'start' }); };
@@ -682,30 +577,30 @@ addEventListener('keydown', e => {
   if (e.key === 'ArrowLeft') prevSpread();
 });
 
-/* ===== Render Katalog & Resep ===== */
 $('elList').innerHTML = ELEMENTS.map(e => `<div class="el ${e.cls} border p-2 rounded-xl flex items-center gap-2"><span class="f-title text-xl font-black w-8 text-center">${e.sym}</span><div><div class="font-bold">${e.name}</div><div class="text-[10px] opacity-80">${e.qty} Kartu • ${e.type}</div></div></div>`).join('');
 
 const rc = r => `<div class="card p-2.5 space-y-1"><div class="flex justify-between items-center"><b>${r.name}</b><span class="px-2 rounded bg-amber-900 text-amber-100 text-[10px] font-bold">${r.energy} E</span></div><p class="text-[11px]">${r.desc}</p><div class="flex gap-1 flex-wrap">${Object.entries(r.req).map(([s, q]) => `<span class="text-[10px] font-mono px-1.5 rounded bg-amber-900/15 text-amber-900">${q}×${s}</span>`).join('')}</div></div>`;
 const half = Math.ceil(REACTIONS.length / 2);
-$('rcL').innerHTML = REACTIONS.slice(0, half).map(rc).join('');$('rcR').innerHTML = REACTIONS.slice(half).map(rc).join('');
+$('rcL').innerHTML = REACTIONS.slice(0, half).map(rc).join('');
+$('rcR').innerHTML = REACTIONS.slice(half).map(rc).join('');
 
-/* ===== Cauldron Simulator Engine ===== */
 $('pick').innerHTML = ELEMENTS.map(e => `<button onclick="addCauldron('${e.sym}')" class="el ${e.cls} border p-2 rounded-xl flex flex-col items-center"><span class="f-title text-base font-black">${e.sym}</span><span class="text-[8px] uppercase">${e.name}</span></button>`).join('');
 
 function updCauldron() {
   const total = Object.values(cauldron).reduce((a, b) => a + b, 0);
-  $('cc').textContent = total + ' Unsur';$('cd').innerHTML = total ? Object.entries(cauldron).map(([s, q]) => `<span class="px-2 py-0.5 rounded-lg bg-orange-950 border border-orange-500/40 text-xs font-bold text-amber-300 flex items-center gap-1">${s}<span class="bg-orange-500 text-black px-1 rounded-full text-[9px]">${q}</span><button onclick="removeCauldron('${s}')" class="text-red-400 hover:text-white">×</button></span>`).join('') : '<span class="text-xs text-stone-500 italic">Pilih unsur dari halaman kiri...</span>';
+  $('cc').textContent = total + ' Unsur';
+  $('cd').innerHTML = total ? Object.entries(cauldron).map(([s, q]) => `<span class="px-2 py-0.5 rounded-lg bg-orange-950 border border-orange-500/40 text-xs font-bold text-amber-300 flex items-center gap-1">${s}<span class="bg-orange-500 text-black px-1 rounded-full text-[9px]">${q}</span><button onclick="removeCauldron('${s}')" class="text-red-400 hover:text-white">×</button></span>`).join('') : '<span class="text-xs text-stone-500 italic">Pilih unsur dari halaman kiri...</span>';
 }
 
 window.addCauldron = s => { playSound('page'); cauldron[s] = (cauldron[s] || 0) + 1; updCauldron(); };
 window.removeCauldron = s => { playSound('page'); if (--cauldron[s] <= 0) delete cauldron[s]; updCauldron(); };
-window.resetCauldron = () => { playSound('page'); cauldron = {}; updCauldron(); $('out').classList.add('hidden');$('brewing').classList.add('hidden'); };
+window.resetCauldron = () => { playSound('page'); cauldron = {}; updCauldron(); $('out').classList.add('hidden'); $('brewing').classList.add('hidden'); };
 
 window.synthesizeSpell = () => {
   const total = Object.values(cauldron).reduce((a, b) => a + b, 0);
   if (!total) return toast('Pilih unsur terlebih dahulu!');
 
-  $('out').classList.add('hidden');$('brewing').classList.remove('hidden');
+  $('out').classList.add('hidden'); $('brewing').classList.remove('hidden');
 
   setTimeout(() => {
     $('brewing').classList.add('hidden');
@@ -714,20 +609,21 @@ window.synthesizeSpell = () => {
     $('out').classList.remove('hidden');
     if (match) {
       playSound('success');
-      $('boomImg').src = VOLCANO;
+      // GIF potion berhasil, bukan gunung meletus
+      $('boomImg').src = POTION;
       $('boomTx').textContent = match.name;
-      $('oi').textContent = '⚡';$('ot').textContent = match.name;
+      $('oi').textContent = '⚡'; $('ot').textContent = match.name;
       $('od').textContent = match.desc;
       $('orc').textContent = `Formula Terpenuhi! [Biaya: ${match.energy} Energi]`;
     } else {
       playSound('boom');
       document.body.classList.add('shake');
       setTimeout(() => document.body.classList.remove('shake'), 500);
-
       $('boomImg').src = VOLCANO;
-      $('boomTx').textContent = 'REAKSI GAGAL / MELEDAK!';$('oi').textContent = '💥';
+      $('boomTx').textContent = 'REAKSI GAGAL / MELEDAK!'; $('oi').textContent = '💥';
       $('ot').textContent = 'REAKSI GAGAL / MELEDAK!';
-      $('od').textContent = 'Kombinasi unsur di kawah tidak cocok dengan resep yang ada.';$('orc').textContent = 'Kombinasi meledak tanpa merakit reaksi berdaya guna.';
+      $('od').textContent = 'Kombinasi unsur di kawah tidak cocok dengan resep yang ada.';
+      $('orc').textContent = 'Kombinasi meledak tanpa merakit reaksi berdaya guna.';
     }
 
     $('boom').classList.add('show');
@@ -735,7 +631,6 @@ window.synthesizeSpell = () => {
   }, 1200);
 };
 
-/* ===== Rating & Modal ===== */
 window.setStars = r => {
   playSound('page');
   window.selectedRating = r;
@@ -744,12 +639,11 @@ window.setStars = r => {
 };
 
 window.openModal = id => {
-  $('mimg').src =$(id).src;
+  $('mimg').src = $(id).src;
   $('modal').classList.replace('hidden', 'flex');
 };
 window.closeModal = () => $('modal').classList.replace('flex', 'hidden');
 
-/* ===== Efek Background Partikel Api ===== */
 (function() {
   const c = $('sparks'), x = c.getContext('2d');
   let w, h;
@@ -770,8 +664,7 @@ window.closeModal = () => $('modal').classList.replace('flex', 'hidden');
       p.y -= p.v; p.d += 0.02; p.x += Math.sin(p.d) * 0.5;
       if (p.y < -5) { p.y = h + 5; p.x = Math.random() * w; }
       x.fillStyle = `hsla(${p.hue},100%,60%,${p.a})`;
-      x.shadowColor = `hsl(${p.hue},100%,50%)`;
-      x.shadowBlur = 8;
+      x.shadowColor = `hsl(${p.hue},100%,50%)`; x.shadowBlur = 8;
       x.beginPath(); x.arc(p.x, p.y, p.s, 0, 6.283); x.fill();
     });
     requestAnimationFrame(f);
