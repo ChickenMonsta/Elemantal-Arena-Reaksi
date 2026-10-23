@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<!-- Meta viewport sangat penting untuk HP agar tidak bisa di-zoom sembarangan -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Tracker - Elemental Arena</title>
+<link rel="icon" type="image/png" href="https://media.tenor.com/oT6s6zOeo9IAAAAi/volcano-joypixels.gif">
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+    @font-face {
+        font-family: 'Lifecraft';
+        src: url('https://fonts.cdnfonts.com/s/14107/Lifecraft.woff') format('woff');
+    }
+    :root { -webkit-tap-highlight-color: transparent; }
+    body {
+        background: radial-gradient(circle at 50% 0%, #3a0f06 0%, #120504 50%, #000000 100%) fixed;
+        color: #f3e5c8;
+        font-family: 'Plus Jakarta Sans', sans-serif;
+        overscroll-behavior-y: contain; /* Mencegah pull-to-refresh di Android */
+        user-select: none;
+    }
+    .f-title { font-family: 'Lifecraft', serif; }
+    
+    /* Tombol Besar untuk HP */
+    .btn-stat {
+        transition: transform 0.1s, filter 0.1s;
+        box-shadow: inset 0 -4px 0 rgba(0,0,0,0.5);
+    }
+    .btn-stat:active {
+        transform: translateY(4px);
+        box-shadow: inset 0 0 0 rgba(0,0,0,0.5);
+        filter: brightness(1.2);
+    }
+    
+    /* Animasi saat Kena Damage atau Heal */
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+    .shake { animation: shake 0.3s ease-in-out; }
+    
+    @keyframes pulse-green {
+        0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+        70% { box-shadow: 0 0 0 20px rgba(34, 197, 94, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+    }
+    .heal-pulse { animation: pulse-green 0.5s; }
+
+    /* Custom Scrollbar untuk Log */
+    .log-scroll::-webkit-scrollbar { width: 4px; }
+    .log-scroll::-webkit-scrollbar-thumb { background: #8b4513; border-radius: 4px; }
+</style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden">
+
+    <!-- HEADER -->
+    <header class="bg-black/80 backdrop-blur-md border-b border-orange-500/30 px-4 py-3 flex justify-between items-center z-10 shadow-lg">
+        <div class="flex items-center gap-2">
+            <img src="https://media.tenor.com/oT6s6zOeo9IAAAAi/volcano-joypixels.gif" class="w-8 h-8" alt="Logo">
+            <div>
+                <h1 class="f-title text-xl text-amber-400 tracking-wider leading-none">PLAYER TRACKER</h1>
+            </div>
+        </div>
+        <button onclick="resetGame()" class="text-xs bg-red-950/80 border border-red-500/50 text-red-300 px-3 py-1.5 rounded-lg font-bold">
+            <i class="fa-solid fa-rotate-left"></i> Reset
+        </button>
+    </header>
+
+    <!-- KONTEN UTAMA (Scrollable area) -->
+    <main class="flex-1 overflow-y-auto flex flex-col p-4 gap-4 pb-20">
+        
+        <!-- Input Nama Pemain -->
+        <div class="bg-stone-900/60 border border-amber-900/50 rounded-2xl p-3 shadow-inner text-center">
+            <input type="text" id="playerName" placeholder="Nama Alchemist..." class="w-full bg-transparent text-center text-xl font-black text-amber-100 placeholder-amber-900/50 focus:outline-none border-b-2 border-transparent focus:border-orange-500 transition px-2 py-1" onblur="saveData()">
+        </div>
+
+        <!-- TRACKER HP -->
+        <div id="hpCard" class="bg-gradient-to-b from-red-950 to-black border-2 border-red-900 rounded-3xl p-5 shadow-[0_0_30px_rgba(220,38,38,0.2)] flex flex-col items-center gap-4 relative overflow-hidden">
+            <div class="absolute top-0 w-full h-1 bg-gradient-to-r from-transparent via-red-500 to-transparent opacity-50"></div>
+            
+            <div class="text-red-400 font-bold text-sm tracking-[0.2em] flex items-center gap-2">
+                <i class="fa-solid fa-heart"></i> HEALTH POINTS (HP)
+            </div>
+            
+            <div class="flex items-center justify-between w-full px-2">
+                <button onclick="changeVal('hp', -1)" class="btn-stat w-16 h-16 rounded-full bg-red-600 border-2 border-red-400 text-white text-3xl font-black flex items-center justify-center">
+                    <i class="fa-solid fa-minus"></i>
+                </button>
+                
+                <div class="text-center">
+                    <div id="hpVal" class="f-title text-8xl text-white drop-shadow-[0_0_15px_rgba(220,38,38,0.8)] leading-none">20</div>
+                    <div class="text-red-500/80 text-xs font-bold mt-1">Maks: 20</div>
+                </div>
+
+                <button onclick="changeVal('hp', 1)" class="btn-stat w-16 h-16 rounded-full bg-emerald-600 border-2 border-emerald-400 text-white text-3xl font-black flex items-center justify-center">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- TRACKER SHIELD -->
+        <div id="shieldCard" class="bg-gradient-to-b from-sky-950 to-black border-2 border-sky-900 rounded-3xl p-5 shadow-[0_0_30px_rgba(14,165,233,0.15)] flex flex-col items-center gap-4">
+            <div class="text-sky-400 font-bold text-sm tracking-[0.2em] flex items-center gap-2">
+                <i class="fa-solid fa-shield-halved"></i> SHIELD POINT
+            </div>
+            
+            <div class="flex items-center justify-between w-full px-2">
+                <button onclick="changeVal('shield', -1)" class="btn-stat w-14 h-14 rounded-full bg-sky-800 border-2 border-sky-500 text-white text-2xl font-black flex items-center justify-center">
+                    <i class="fa-solid fa-minus"></i>
+                </button>
+                
+                <div id="shieldVal" class="f-title text-7xl text-sky-100 drop-shadow-[0_0_15px_rgba(14,165,233,0.6)] leading-none">0</div>
+
+                <button onclick="changeVal('shield', 1)" class="btn-stat w-14 h-14 rounded-full bg-sky-600 border-2 border-sky-300 text-white text-2xl font-black flex items-center justify-center">
+                    <i class="fa-solid fa-plus"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- TOMBOL TERIMA DAMAGE (Otomatis hitung Shield lalu HP) -->
+        <button onclick="takeDamagePrompt()" class="mt-2 w-full py-4 rounded-2xl bg-gradient-to-r from-orange-600 to-red-600 border border-orange-400 text-white font-black text-xl shadow-[0_0_20px_rgba(2ea,88,12,0.4)] flex justify-center items-center gap-3 active:scale-95 transition">
+            <i class="fa-solid fa-burst"></i> TERIMA SERANGAN!
+        </button>
+
+    </main>
+
+    <!-- LOG RIWAYAT (Di bawah, bisa ditarik naik) -->
+    <div class="fixed bottom-0 left-0 right-0 bg-black/95 border-t border-amber-900/50 rounded-t-3xl shadow-[0_-10px_30px_rgba(0,0,0,0.8)] z-20">
+        <div class="w-12 h-1.5 bg-stone-700 rounded-full mx-auto mt-2"></div>
+        <div class="px-4 py-2 flex justify-between items-center border-b border-stone-800">
+            <span class="text-xs font-bold text-stone-400"><i class="fa-solid fa-history"></i> Riwayat Aksi</span>
+        </div>
+        <div class="p-4 pt-2">
+            <ul id="logList" class="log-scroll h-24 overflow-y-auto space-y-2 text-xs flex flex-col-reverse">
+                <!-- Logs will appear here -->
+            </ul>
+        </div>
+    </div>
+
+    <!-- MODAL INPUT DAMAGE -->
+    <div id="dmgModal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-stone-900 border-2 border-orange-500 rounded-3xl p-6 w-full max-w-sm text-center shadow-[0_0_40px_rgba(255,100,0,0.3)]">
+            <h2 class="f-title text-3xl text-orange-400 mb-2">Berapa Damage?</h2>
+            <p class="text-xs text-stone-400 mb-6">Damage akan memotong Shield dulu, baru HP.</p>
+            
+            <div class="flex flex-wrap justify-center gap-3 mb-6">
+                <button onclick="applyDamage(1)" class="w-16 h-16 rounded-2xl bg-red-950 border border-red-500 text-red-100 text-xl font-bold active:bg-red-600">1</button>
+                <button onclick="applyDamage(2)" class="w-16 h-16 rounded-2xl bg-red-950 border border-red-500 text-red-100 text-xl font-bold active:bg-red-600">2</button>
+                <button onclick="applyDamage(3)" class="w-16 h-16 rounded-2xl bg-red-950 border border-red-500 text-red-100 text-xl font-bold active:bg-red-600">3</button>
+                <button onclick="applyDamage(4)" class="w-16 h-16 rounded-2xl bg-red-950 border border-red-500 text-red-100 text-xl font-bold active:bg-red-600">4</button>
+                <button onclick="applyDamage(6)" class="w-16 h-16 rounded-2xl bg-red-950 border border-red-500 text-red-100 text-xl font-bold active:bg-red-600">6</button>
+                <button onclick="applyDamage(8)" class="w-16 h-16 rounded-2xl bg-red-950 border border-red-500 text-red-100 text-xl font-bold active:bg-red-600">8</button>
+                <button onclick="applyDamage(12)" class="w-16 h-16 rounded-2xl bg-red-950 border border-red-500 text-red-100 text-xl font-bold active:bg-red-600">12</button>
+            </div>
+            
+            <button onclick="closeDmgModal()" class="px-6 py-2 rounded-xl bg-stone-800 text-stone-300 text-sm font-bold w-full">Batal</button>
+        </div>
+    </div>
+
+<script>
+    // State Game
+    let state = {
+        name: "",
+        hp: 20,
+        shield: 0,
+        logs: []
+    };
+
+    // --- AUDIO SYSTEM RINGAN ---
+    const AC = new (window.AudioContext || window.webkitAudioContext)();
+    function playSfx(type) {
+        if (AC.state === 'suspended') AC.resume();
+        const n = AC.currentTime;
+        
+        if (type === 'click') {
+            const o = AC.createOscillator(), g = AC.createGain();
+            o.type = 'sine'; o.frequency.setValueAtTime(800, n); o.frequency.exponentialRampToValueAtTime(300, n + 0.1);
+            g.gain.setValueAtTime(0.3, n); g.gain.exponentialRampToValueAtTime(0.01, n + 0.1);
+            o.connect(g).connect(AC.destination); o.start(); o.stop(n + 0.1);
+        } else if (type === 'hurt') {
+            const o = AC.createOscillator(), g = AC.createGain();
+            o.type = 'sawtooth'; o.frequency.setValueAtTime(150, n); o.frequency.exponentialRampToValueAtTime(40, n + 0.3);
+            g.gain.setValueAtTime(0.5, n); g.gain.exponentialRampToValueAtTime(0.01, n + 0.3);
+            o.connect(g).connect(AC.destination); o.start(); o.stop(n + 0.3);
+            if(navigator.vibrate) navigator.vibrate(200); // Getar HP
+        } else if (type === 'heal') {
+            const o = AC.createOscillator(), g = AC.createGain();
+            o.type = 'triangle'; o.frequency.setValueAtTime(400, n); o.frequency.exponentialRampToValueAtTime(800, n + 0.2);
+            g.gain.setValueAtTime(0.3, n); g.gain.exponentialRampToValueAtTime(0.01, n + 0.2);
+            o.connect(g).connect(AC.destination); o.start(); o.stop(n + 0.2);
+        } else if (type === 'shield_hit') {
+            const o = AC.createOscillator(), g = AC.createGain();
+            o.type = 'square'; o.frequency.setValueAtTime(600, n); o.frequency.exponentialRampToValueAtTime(200, n + 0.15);
+            g.gain.setValueAtTime(0.2, n); g.gain.exponentialRampToValueAtTime(0.01, n + 0.15);
+            o.connect(g).connect(AC.destination); o.start(); o.stop(n + 0.15);
+            if(navigator.vibrate) navigator.vibrate(50);
+        }
+    }
+
+    // --- LOGIC UI & LOCAL STORAGE ---
+    const $ = id => document.getElementById(id);
+
+    function init() {
+        const saved = localStorage.getItem('EA_Tracker');
+        if (saved) state = JSON.parse(saved);
+        $('playerName').value = state.name;
+        render();
+    }
+
+    function saveData() {
+        state.name = $('playerName').value;
+        localStorage.setItem('EA_Tracker', JSON.stringify(state));
+    }
+
+    function addLog(msg, colorClass) {
+        const time = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        state.logs.unshift({ msg, colorClass, time });
+        if (state.logs.length > 15) state.logs.pop(); // Max 15 log
+        saveData();
+        renderLogs();
+    }
+
+    function renderLogs() {
+        $('logList').innerHTML = state.logs.map(l => 
+            `<li class="bg-stone-900/50 p-2 rounded flex justify-between items-center"><span class="${l.colorClass} font-bold">${l.msg}</span> <span class="text-[10px] text-stone-500">${l.time}</span></li>`
+        ).join('');
+    }
+
+    function render() {
+        $('hpVal').textContent = state.hp;
+        $('shieldVal').textContent = state.shield;
+        
+        // Ganti warna tulisan HP jika kritis
+        $('hpVal').className = `f-title text-8xl leading-none drop-shadow-[0_0_15px_rgba(220,38,38,0.8)] ${state.hp <= 5 ? 'text-red-500 animate-pulse' : 'text-white'}`;
+        
+        renderLogs();
+    }
+
+    function animCard(id, type) {
+        const c = $(id);
+        c.classList.remove('shake', 'heal-pulse');
+        void c.offsetWidth; // trigger reflow
+        c.classList.add(type);
+    }
+
+    // --- FUNGSI TOMBOL MANUAL (+/-) ---
+    window.changeVal = (stat, amount) => {
+        if (stat === 'hp') {
+            state.hp += amount;
+            if (state.hp > 20) state.hp = 20; // Batas Max HP
+            if (state.hp < 0) state.hp = 0;
+            
+            if (amount > 0) { playSfx('heal'); animCard('hpCard', 'heal-pulse'); addLog(`+${amount} HP (Manual)`, 'text-emerald-400'); }
+            else { playSfx('hurt'); animCard('hpCard', 'shake'); addLog(`${amount} HP (Manual)`, 'text-red-400'); }
+            
+        } else if (stat === 'shield') {
+            state.shield += amount;
+            if (state.shield < 0) state.shield = 0;
+            
+            if (amount > 0) { playSfx('heal'); addLog(`+${amount} Shield (Manual)`, 'text-sky-400'); }
+            else { playSfx('click'); addLog(`${amount} Shield (Manual)`, 'text-sky-300'); }
+        }
+        saveData();
+        render();
+    };
+
+    // --- FUNGSI TERIMA DAMAGE OTOMATIS (Menguras Shield dulu) ---
+    window.takeDamagePrompt = () => { $('dmgModal').classList.replace('hidden', 'flex'); };
+    window.closeDmgModal = () => { $('dmgModal').classList.replace('flex', 'hidden'); };
+
+    window.applyDamage = (dmg) => {
+        closeDmgModal();
+        let sisaDmg = dmg;
+        let logText = `Terkena Serangan -${dmg} Damage! `;
+
+        if (state.shield > 0) {
+            if (state.shield >= sisaDmg) {
+                state.shield -= sisaDmg;
+                sisaDmg = 0;
+                logText += `(Semua diserap Shield)`;
+                playSfx('shield_hit');
+                animCard('shieldCard', 'shake');
+            } else {
+                sisaDmg -= state.shield;
+                logText += `(-${state.shield} Shield Hancur, sisa -${sisaDmg} tembus ke HP)`;
+                state.shield = 0;
+                playSfx('hurt');
+                animCard('hpCard', 'shake');
+            }
+        } else {
+            playSfx('hurt');
+            animCard('hpCard', 'shake');
+        }
+
+        if (sisaDmg > 0) {
+            state.hp -= sisaDmg;
+            if (state.hp < 0) state.hp = 0;
+        }
+
+        addLog(logText, 'text-orange-400');
+        saveData();
+        render();
+
+        if (state.hp === 0) {
+            setTimeout(() => alert("☠️ ALCHEMIST GUGUR! HP mencapai 0."), 300);
+        }
+    };
+
+    // --- RESET ---
+    window.resetGame = () => {
+        if(confirm("Mulai game baru? HP akan kembali ke 20 dan Shield ke 0.")){
+            state.hp = 20;
+            state.shield = 0;
+            state.logs = [];
+            addLog("Game Baru Dimulai!", "text-amber-400");
+            saveData();
+            render();
+            playSfx('click');
+        }
+    };
+
+    // Mulai saat load
+    init();
+</script>
+</body>
+</html>
