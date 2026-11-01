@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elemental Arena: Reaksi — Simulator</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>⚗️</text></svg>">
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=MedievalSharp&family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#dfac40;--gold2:#fbe29a;--ink:#2a1a12}
+*{-webkit-tap-highlight-color:transparent;box-sizing:border-box}
+body{background:radial-gradient(ellipse at 50% 0%,#3a0f06 0%,#120504 45%,#050202 100%) fixed;color:#f3e5c8;font-family:'Plus Jakarta Sans',sans-serif;overflow-x:hidden;user-select:none;margin:0;min-height:100vh}
+.f-title{font-family:'Cinzel Decorative',serif}
+.f-med{font-family:'MedievalSharp',serif}
+.shine{background:linear-gradient(90deg,#b8741a,#fbe29a,#ff7a1a,#fbe29a,#b8741a);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 5s linear infinite;filter:drop-shadow(0 0 14px rgba(255,100,0,.55))}
+@keyframes shine{to{background-position:-250% 0}}
+.parchment{background:radial-gradient(circle at 30% 20%,rgba(139,69,19,.1),transparent 60%),#f3e5c8;color:var(--ink)}
+.dark-panel{background:radial-gradient(circle at 50% 0,rgba(255,69,0,.14),transparent 70%),#160b08;box-shadow:inset 0 0 60px #000}
+.btn-fire{background:linear-gradient(90deg,#ff4500,#ff9d00,#ff4500);background-size:200% 100%;animation:lava 3s linear infinite;box-shadow:0 0 24px rgba(255,90,0,.6);transition:.2s}
+.btn-fire:hover{transform:scale(1.03)}
+.btn-fire:active{transform:scale(.97)}
+@keyframes lava{to{background-position:200% 0}}
+.card{transition:.2s;cursor:pointer}
+.card:hover{transform:translateY(-6px) scale(1.03);box-shadow:0 8px 24px rgba(255,120,0,.4)}
+.el-card{transition:.15s;cursor:pointer;position:relative}
+.el-card:hover{transform:translateY(-8px) scale(1.06);z-index:10}
+.el-card.selected{border-color:#fbe29a !important;box-shadow:0 0 18px rgba(251,226,154,.8);transform:translateY(-8px) scale(1.06)}
+.el-card.used{opacity:.3;pointer-events:none}
+.scroll::-webkit-scrollbar{width:5px;height:5px}
+.scroll::-webkit-scrollbar-thumb{background:#8b4513;border-radius:4px}
+.scroll::-webkit-scrollbar-track{background:#1a0a06}
+.hp-bar{transition:width .4s ease}
+.shake{animation:shake .4s}
+@keyframes shake{20%{transform:translate(-5px,2px)}40%{transform:translate(5px,-3px)}60%{transform:translate(-3px,-2px)}80%{transform:translate(3px,2px)}}
+#toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,120px);background:#1c0d08;border:1px solid var(--gold);color:var(--gold2);padding:.7rem 1.2rem;border-radius:999px;z-index:90;transition:.4s;box-shadow:0 0 22px rgba(255,140,0,.45);font-size:.8rem;font-weight:700;max-width:92vw;text-align:center}
+#toast.show{transform:translate(-50%,0)}
+#boom{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;background:radial-gradient(circle,rgba(255,80,0,.55),rgba(0,0,0,.92));backdrop-filter:blur(4px)}
+#boom.show{display:flex;animation:fade .3s}
+@keyframes fade{from{opacity:0}}
+.log-entry{border-left:3px solid #b8741a;padding-left:6px;margin-bottom:3px;font-size:10px;line-height:1.3}
+.player-panel{transition:.3s;border:2px solid transparent}
+.player-panel.active{border-color:#ff9d00;box-shadow:0 0 18px rgba(255,157,0,.5);background:rgba(255,100,0,.1)}
+.player-panel.dead{opacity:.35;filter:grayscale(1)}
+.reaction-slot{border:1px dashed rgba(223,172,64,.4);border-radius:.7rem;min-height:110px;transition:.2s}
+.reaction-slot.filled{border-style:solid;border-color:rgba(223,172,64,.7);background:rgba(120,60,20,.15);cursor:pointer}
+.reaction-slot.filled:hover{background:rgba(255,120,0,.15)}
+.tab-btn{padding:6px 14px;border-radius:999px;font-weight:700;font-size:11px;border:1px solid #5c4a3a;background:#1c1210;color:#cbbba0;transition:.2s}
+.tab-btn.on{background:linear-gradient(90deg,#b8741a,#ff6a1a);color:#2a0c02;border-color:#fbe29a}
+.mana-pip{width:20px;height:20px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#ffe27a,#ff9d00);box-shadow:0 0 8px rgba(255,180,0,.8);display:inline-block}
+.mana-pip.empty{background:#2a1a12;box-shadow:none;border:1px solid #4a2a12}
+.fade-in{animation:fadeIn .4s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}}
+.stat-badge{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:700}
+</style>
+</head>
+<body>
+<canvas id="sparks" class="fixed inset-0 pointer-events-none" style="z-index:0"></canvas>
+
+<div id="app" class="relative z-10 max-w-[1500px] mx-auto p-2 sm:p-4 min-h-screen flex flex-col">
+
+  <!-- HEADER -->
+  <header class="flex items-center justify-between gap-2 mb-2 flex-wrap">
+    <div class="flex items-center gap-2">
+      <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-red-700 flex items-center justify-center text-xl shadow-lg">⚗️</div>
+      <div>
+        <h1 class="f-title font-black text-lg sm:text-xl shine leading-none">ELEMENTAL ARENA</h1>
+        <span class="f-med text-[9px] text-orange-400 tracking-widest">REAKSI • SIMULATOR</span>
+      </div>
+    </div>
+    <div class="flex items-center gap-2">
+      <button onclick="openRules()" class="tab-btn"><i class="fa-solid fa-book"></i> Aturan</button>
+      <button onclick="restartGame()" class="tab-btn"><i class="fa-solid fa-rotate"></i> Main Lagi</button>
+    </div>
+  </header>
+
+  <!-- SETUP SCREEN -->
+  <div id="setup" class="flex-1 flex items-center justify-center">
+    <div class="dark-panel rounded-3xl border-2 border-amber-500/40 p-6 sm:p-10 max-w-2xl w-full text-center space-y-6 shadow-2xl">
+      <div class="text-6xl">⚗️🔥</div>
+      <h2 class="f-title font-black text-3xl sm:text-4xl shine">PILIH MODE PERTARUNGAN</h2>
+      <p class="text-sm text-amber-100/70">Kumpulkan amunisi unsur, racik reaksi kimia mematikan, dan hancurkan lawan terakhir!</p>
+
+      <div class="grid sm:grid-cols-3 gap-3">
+        <button onclick="selectMode('ffa')" id="mode-ffa" class="mode-btn card dark-panel rounded-2xl p-4 border-2 border-amber-700/40 hover:border-orange-400 text-center space-y-2">
+          <div class="text-3xl">⚔️</div>
+          <div class="font-bold text-sm">Free-For-All</div>
+          <div class="text-[10px] text-amber-400">4 Pemain • Setiap lawan dirinya sendiri</div>
+        </button>
+        <button onclick="selectMode('1v1')" id="mode-1v1" class="mode-btn card dark-panel rounded-2xl p-4 border-2 border-amber-700/40 hover:border-orange-400 text-center space-y-2">
+          <div class="text-3xl">🆚</div>
+          <div class="font-bold text-sm">Duel 1v1</div>
+          <div class="text-[10px] text-amber-400">2 Pemain • Adu taktik murni</div>
+        </button>
+        <button onclick="selectMode('2v2')" id="mode-2v2" class="mode-btn card dark-panel rounded-2xl p-4 border-2 border-amber-700/40 hover:border-orange-400 text-center space-y-2">
+          <div class="text-3xl">🤝</div>
+          <div class="font-bold text-sm">Tim 2v2</div>
+          <div class="text-[10px] text-amber-400">4 Pemain • 2 Tim berbagi kemenangan</div>
+        </button>
+      </div>
+
+      <div id="setupExtra" class="hidden space-y-4 fade-in">
+        <div class="parchment rounded-2xl p-4 text-left space-y-3">
+          <h3 class="f-med font-bold text-amber-950 text-sm">Atur Pemain</h3>
+          <div id="playerConfig" class="space-y-2"></div>
+        </div>
+        <button onclick="startGame()" class="btn-fire w-full py-3.5 rounded-2xl text-black f-title font-black text-xl">🔥 MULAI PERTARUNGAN</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME SCREEN -->
+  <div id="game" class="hidden flex-1 flex flex-col gap-2">
+
+    <!-- Opponents row -->
+    <div id="opponents" class="grid gap-2 grid-cols-2 lg:grid-cols-4"></div>
+
+    <!-- Middle: Pasar Reaksi + log -->
+    <div class="flex flex-col lg:flex-row gap-2">
+      <div class="dark-panel rounded-2xl border border-amber-600/40 p-2 flex-1">
+        <div class="flex items-center justify-between mb-1.5 px-1">
+          <span class="f-med text-[11px] font-bold text-orange-400 tracking-widest">📜 PASAR REAKSI</span>
+          <span id="deckCount" class="text-[10px] text-amber-500 font-mono"></span>
+        </div>
+        <div id="market" class="grid grid-cols-2 sm:grid-cols-4 gap-1.5"></div>
+      </div>
+      <div class="dark-panel rounded-2xl border border-amber-600/40 p-2 w-full lg:w-64 flex flex-col">
+        <div class="f-med text-[11px] font-bold text-orange-400 tracking-widest mb-1 px-1">📖 CATATAN LAGA</div>
+        <div id="log" class="scroll overflow-y-auto flex-1 max-h-32 lg:max-h-44 pr-1"></div>
+      </div>
+    </div>
+
+    <!-- Current player zone -->
+    <div class="dark-panel rounded-2xl border-2 border-orange-500/50 p-2 sm:p-3 space-y-2">
+      <div class="flex items-center justify-between flex-wrap gap-2">
+        <div class="flex items-center gap-2">
+          <div id="curAvatar" class="w-9 h-9 rounded-full flex items-center justify-center text-lg font-black"></div>
+          <div>
+            <div id="curName" class="font-bold text-sm"></div>
+            <div class="flex items-center gap-2 text-[10px]">
+              <span class="text-red-400 font-bold">❤️ <span id="curHP">20</span>/20</span>
+              <span class="text-cyan-400 font-bold">🛡️ <span id="curShield">0</span></span>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center gap-1">
+          <span class="text-[10px] text-amber-400 font-bold mr-1">ENERGI</span>
+          <div id="manaPips"></div>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button id="btnEnd" onclick="endTurn()" class="px-3 py-1.5 rounded-xl bg-amber-800/80 border border-amber-500/50 text-amber-100 text-xs font-bold hover:bg-amber-700 transition">Akhir Giliran ➜</button>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="flex flex-wrap gap-1.5">
+        <button onclick="openAction('reaction')" class="tab-btn text-[10px]"><i class="fa-solid fa-wand-magic-sparkles"></i> Rakit Reaksi (Pilih Kartu Resep)</button>
+        <button onclick="openAction('shield')" class="tab-btn text-[10px]"><i class="fa-solid fa-shield-halved"></i> Tempa Tameng</button>
+        <button onclick="openAction('catalyst')" class="tab-btn text-[10px]"><i class="fa-solid fa-bolt"></i> Pasang Katalis</button>
+        <button onclick="openAction('transmute')" class="tab-btn text-[10px]"><i class="fa-solid fa-recycle"></i> Transmutasi (1E)</button>
+      </div>
+
+      <!-- Hand -->
+      <div>
+        <div class="flex items-center justify-between px-1 mb-1">
+          <span class="f-med text-[10px] font-bold text-amber-400 tracking-widest">🃏 KARTU DI TANGAN (<span id="handCount">0</span>/7)</span>
+          <span id="selectionInfo" class="text-[10px] text-amber-300 font-mono"></span>
+        </div>
+        <div id="hand" class="flex gap-1.5 overflow-x-auto scroll pb-1 min-h-[110px]"></div>
+      </div>
+    </div>
+
+    <!-- ACTION MODAL -->
+    <div id="actionModal" class="fixed inset-0 z-[85] bg-black/85 backdrop-blur-sm hidden items-center justify-center p-3" onclick="if(event.target===this)closeAction()">
+      <div class="dark-panel rounded-2xl border-2 border-orange-500/50 p-4 max-w-3xl w-full max-h-[85vh] overflow-y-auto scroll space-y-3">
+        <div class="flex justify-between items-center">
+          <h3 id="actionTitle" class="f-title font-black text-lg text-amber-300"></h3>
+          <button onclick="closeAction()" class="text-red-400 hover:text-white text-xl px-2">✕</button>
+        </div>
+        <div id="actionBody"></div>
+      </div>
+    </div>
+
+    <!-- WIN SCREEN -->
+    <div id="winScreen" class="fixed inset-0 z-[86] bg-black/90 backdrop-blur-md hidden items-center justify-center p-4">
+      <div class="text-center space-y-4">
+        <div class="text-7xl animate-bounce">🏆</div>
+        <h2 id="winText" class="f-title font-black text-3xl shine"></h2>
+        <p id="winSub" class="text-sm text-amber-200"></p>
+        <button onclick="restartGame()" class="btn-fire px-8 py-3 rounded-2xl text-black font-black text-lg">Main Lagi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RULES MODAL -->
+  <div id="rulesModal" class="fixed inset-0 z-[87] bg-black/90 backdrop-blur-md hidden items-center justify-center p-3" onclick="if(event.target===this)this.classList.replace('flex','hidden')">
+    <div class="parchment rounded-2xl max-w-2xl w-full max-h-[85vh] overflow-y-auto scroll p-5 space-y-3 text-xs">
+      <div class="flex justify-between items-center">
+        <h3 class="f-title font-black text-xl text-amber-950">📖 ATURAN CEPAT</h3>
+        <button onclick="this.closest('#rulesModal').classList.replace('flex','hidden')" class="text-red-700 font-black text-xl px-2">✕</button>
+      </div>
+      <div class="space-y-2 text-stone-800">
+        <p><b>🎯 Tujuan:</b> Jadilah Alchemist terakhir yang bertahan (HP > 0).</p>
+        <p><b>🃏 Deck:</b> 68 Kartu Unsur + 12 Tameng + 12 Katalis = 92 kartu utama. 28 Kartu Reaksi terbuka di Pasar Reaksi.</p>
+        <p><b>❤️ Vitalitas:</b> Mulai 20 HP. 🛡️ Shield mulai 0.</p>
+        <p><b>🔄 Giliran:</b></p>
+        <ul class="list-disc list-inside ml-2 space-y-1">
+          <li><b>Fase Ambil:</b> Tarik 2 kartu (maks 7 di tangan).</li>
+          <li><b>Fase Aksi:</b> 3 Energi. Bisa rakit reaksi, tempa tameng, pasang katalis, atau transmutasi.</li>
+          <li><b>Akhir Giliran:</b> Sisa energi hangus. Pasar Reaksi diisi ulang ke 4 kartu.</li>
+        </ul>
+        <p><b>⚗️ Rakit Reaksi:</b> Korbankan kartu unsur dari tangan sesuai syarat resep + bayar energi. Efek langsung terjadi.</p>
+        <p><b>🛡️ Shield:</b> Serangan mengikis Shield dulu. Jika habis, sisa damage memotong HP. <b>Racun menembus Shield!</b></p>
+        <p><b>💀 Gugur:</b> HP 0 = eliminasi. Pemain/tim terakhir menang.</p>
+        <p><b>🤝 2v2:</b> Tim berbagi kemenangan. Serangan AOE mengenai semua lawan (bukan sekutu).</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+<div id="boom" onclick="this.classList.remove('show')">
+  <div class="text-center space-y-2 p-4">
+    <div id="boomIcon" class="text-7xl"></div>
+    <div id="boomTx" class="f-title font-black text-2xl shine mt-2"></div>
+    <p class="text-xs text-amber-200">Klik di mana saja untuk menutup</p>
+  </div>
+</div>
+
+<script>
+/* ================= GAME DATA ================= */
+const ELEMENTS = {
+  H:  { sym:'H',  name:'Hidrogen', qty:12, color:'#ec4899', bg:'rgba(131,24,67,.6)',  type:'Gas Reaktif' },
+  O:  { sym:'O',  name:'Oksigen',  qty:12, color:'#22d3ee', bg:'rgba(21,94,117,.6)',  type:'Gas Reaktif' },
+  C:  { sym:'C',  name:'Karbon',   qty:10, color:'#a8a29e', bg:'rgba(41,37,36,.7)',   type:'Non-Logam' },
+  Na: { sym:'Na', name:'Natrium',  qty:8,  color:'#facc15', bg:'rgba(113,63,18,.6)',  type:'Alkali' },
+  Cl: { sym:'Cl', name:'Klorin',   qty:8,  color:'#34d399', bg:'rgba(6,78,59,.6)',    type:'Halogen' },
+  Fe: { sym:'Fe', name:'Besi',     qty:6,  color:'#94a3b8', bg:'rgba(30,41,59,.7)',   type:'Logam' },
+  S:  { sym:'S',  name:'Belerang', qty:4,  color:'#fbbf24', bg:'rgba(120,53,15,.6)',  type:'Non-Logam' },
+  He: { sym:'He', name:'Helium',   qty:4,  color:'#fb923c', bg:'rgba(124,45,18,.6)',  type:'Gas Mulia' },
+  Ar: { sym:'Ar', name:'Argon',    qty:4,  color:'#c084fc', bg:'rgba(88,28,135,.6)',  type:'Gas Mulia' }
+};
+
+const REACTIONS = [
+  { id:'r1', name:'Ledakan Sodium',      energy:2, req:{Na:1,H:1},    desc:'6 Damage instan + Hancurkan Shield lawan', dmg:6, shieldBreak:true },
+  { id:'r2', name:'Gas Beracun Klorin',  energy:1, req:{Cl:2},        desc:'3 Damage instan (Tembus Shield)',           dmg:3, pierce:true },
+  { id:'r3', name:'Pembakaran Metana',   energy:2, req:{C:1,H:2},     desc:'8 Damage instan',                          dmg:8 },
+  { id:'r4', name:'Hujan Asam',          energy:2, req:{S:1,O:1,H:1}, desc:'4 Damage ke SEMUA lawan (AOE)',            dmg:4, aoe:true },
+  { id:'r5', name:'Reaksi Garam Dapur',  energy:1, req:{Na:1,Cl:1},   desc:'Restorasi +4 HP diri sendiri',             heal:4 },
+  { id:'r6', name:'Reaksi Beku Shock',   energy:1, req:{H:1,O:1,He:1},desc:'3 Damage + Lawan kehilangan 1 Energi',     dmg:3, stun:true },
+  { id:'r7', name:'Korosi Karat Cepat',  energy:1, req:{Fe:1,O:2},    desc:'Hancurkan seluruh Shield lawan',           dmg:0, shieldBreak:true },
+  { id:'r8', name:'Super Plasma Blast',  energy:3, req:{C:1,O:1},     desc:'12 Damage fatal (Reaksi Pamungkas)',       dmg:12 },
+  { id:'r9', name:'Kilat Elektrolisis',  energy:2, req:{H:2,O:1},     desc:'5 Damage + Stun 1 Energi',                 dmg:5, stun:true },
+  { id:'r10',name:'Ledakan Klorat',      energy:3, req:{Cl:1,O:3},    desc:'10 Damage instan',                         dmg:10 },
+  { id:'r11',name:'Bom Termit',          energy:3, req:{Fe:1,S:2},    desc:'9 Damage + Hancurkan Shield lawan',        dmg:9, shieldBreak:true },
+  { id:'r12',name:'Sintesis Amonia',     energy:1, req:{H:3},         desc:'Restorasi +6 HP diri sendiri',             heal:6 },
+  { id:'r13',name:'Pancaran Natrium',    energy:1, req:{Na:2},        desc:'4 Damage ke semua lawan (AOE)',            dmg:4, aoe:true },
+  { id:'r14',name:'Badai Argon',         energy:2, req:{Ar:1,O:2},    desc:'5 Damage ke semua lawan (AOE)',            dmg:5, aoe:true },
+  { id:'r15',name:'Sengat Helium',       energy:1, req:{He:2},        desc:'2 Damage + Stun 1 Energi',                 dmg:2, stun:true },
+  { id:'r16',name:'Bara Belerang',       energy:2, req:{S:1,O:1},     desc:'6 Damage instan',                          dmg:6 },
+  { id:'r17',name:'Karbonisasi',         energy:1, req:{C:2},         desc:'3 Damage instan',                          dmg:3 },
+  { id:'r18',name:'Karatan Besi',        energy:2, req:{Fe:1,O:1},    desc:'4 Damage + Hancurkan Shield lawan',        dmg:4, shieldBreak:true },
+  { id:'r19',name:'Hidrolisis',          energy:1, req:{H:1,O:1},     desc:'Restorasi +3 HP diri sendiri',             heal:3 },
+  { id:'r20',name:'Halogenasi',          energy:2, req:{Cl:1,Na:1},   desc:'5 Damage instan',                          dmg:5 },
+  { id:'r21',name:'Api Unggun',          energy:2, req:{C:1,O:1},     desc:'5 Damage instan',                          dmg:5 },
+  { id:'r22',name:'Awan Asam',           energy:3, req:{S:1,O:2,Cl:1},desc:'7 Damage ke semua lawan (AOE)',            dmg:7, aoe:true },
+  { id:'r23',name:'Peledakan Gas',       energy:2, req:{H:2,He:1},    desc:'6 Damage + Hancurkan Shield lawan',        dmg:6, shieldBreak:true },
+  { id:'r24',name:'Kristalisasi',        energy:1, req:{C:1,Ar:1},    desc:'Restorasi +5 HP diri sendiri',             heal:5 },
+  { id:'r25',name:'Sinar Neon',          energy:2, req:{Ar:1,He:1},   desc:'4 Damage + Stun 1 Energi',                 dmg:4, stun:true },
+  { id:'r26',name:'Ledakan Natrium Air', energy:3, req:{Na:1,O:2},    desc:'8 Damage ke semua lawan (AOE)',            dmg:8, aoe:true },
+  { id:'r27',name:'Reaksi Rantai Besi',  energy:2, req:{Fe:2},        desc:'7 Damage instan',                          dmg:7 },
+  { id:'r28',name:'Pamungkas Alkimia',   energy:3, req:{Na:1,Cl:1,S:1},desc:'10 Damage + Hancurkan Shield lawan',      dmg:10, shieldBreak:true }
+];
+
+const SHIELDS = [
+  { id:'s1', name:'Dinding Argon',   req:{Ar:1},  energy:1, shield:4,  color:'#c084fc' },
+  { id:'s2', name:'Pelindung Besi',  req:{Fe:1},  energy:1, shield:6,  color:'#94a3b8' },
+  { id:'s3', name:'Pertahanan Intan',req:{C:1},   energy:2, shield:10, color:'#67e8f9' }
+];
+
+const CATALYSTS = [
+  { id:'c1', name:'Suhu Tinggi',      energy:1, desc:'+3 Damage ke semua reaksi serangan (3 putaran)', color:'#f97316', effect:'dmg3' },
+  { id:'c2', name:'Percikan Listrik', energy:1, desc:'+2 Damage & Stun 1 Energi lawan (3 putaran)',    color:'#facc15', effect:'dmg2stun' },
+  { id:'c3', name:'Ruang Vakum Lab',  energy:1, desc:'Kebal serangan AOE selama 1 putaran',            color:'#60a5fa', effect:'vakum' },
+  { id:'c4', name:'Katalis Platinum', energy:1, desc:'Diskon -1 Energi merakit reaksi (3 putaran)',    color:'#e5e7eb', effect:'discount' }
+];
+
+/* ================= HELPERS ================= */
+const $ = id => document.getElementById(id);
+let G = null;
+
+function shuffle(a){ const arr=[...a]; for(let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; } return arr; }
+
+function makeDeck(){
+  const deck = [];
+  for(const key in ELEMENTS){
+    const e = ELEMENTS[key];
+    for(let i=0;i<e.qty;i++) deck.push({ kind:'element', sym:key, uid:key+i+'_'+Math.random().toString(36).slice(2,6) });
+  }
+  SHIELDS.forEach(s=>{ for(let i=0;i<4;i++) deck.push({ kind:'shield', cardId:s.id, uid:s.id+i+'_'+Math.random().toString(36).slice(2,6) }); });
+  CATALYSTS.forEach(c=>{ for(let i=0;i<3;i++) deck.push({ kind:'catalyst', cardId:c.id, uid:c.id+i+'_'+Math.random().toString(36).slice(2,6) }); });
+  return shuffle(deck);
+}
+
+function toast(msg){
+  const t = $('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(window._tt);
+  window._tt = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+function playSound(type){
+  try{
+    const AC = window._ac || (window._ac = new (window.AudioContext||window.webkitAudioContext)());
+    if(AC.state==='suspended') AC.resume();
+    const n = AC.currentTime;
+    if(type==='page'){
+      const o = AC.createOscillator(), g = AC.createGain();
+      o.type='sine'; o.frequency.setValueAtTime(140,n); o.frequency.exponentialRampToValueAtTime(70,n+0.12);
+      g.gain.setValueAtTime(0.1,n); g.gain.exponentialRampToValueAtTime(0.001,n+0.13);
+      o.connect(g).connect(AC.destination); o.start(n); o.stop(n+0.14);
+    } else if(type==='success'){
+      [523.25,659.25,783.99].forEach((f,i)=>{
+        const o=AC.createOscillator(),g=AC.createGain();
+        o.type='triangle'; o.frequency.value=f;
+        const t=n+i*0.09;
+        g.gain.setValueAtTime(0.001,t); g.gain.exponentialRampToValueAtTime(0.15,t+0.02); g.gain.exponentialRampToValueAtTime(0.001,t+0.28);
+        o.connect(g).connect(AC.destination); o.start(t); o.stop(t+0.3);
+      });
+    } else if(type==='boom'){
+      const o=AC.createOscillator(),g=AC.createGain();
+      o.type='sawtooth'; o.frequency.setValueAtTime(180,n); o.frequency.exponentialRampToValueAtTime(30,n+0.4);
+      g.gain.setValueAtTime(0.3,n); g.gain.exponentialRampToValueAtTime(0.001,n+0.4);
+      o.connect(g).connect(AC.destination); o.start(); o.stop(n+0.4);
+    }
+  }catch(e){}
+}
+
+/* ================= LOG ================= */
+function addLog(msg){
+  G.log.unshift({ msg, t: Date.now() });
+  if(G.log.length>40) G.log.pop();
+  renderLog();
+}
+function renderLog(){
+  const el = $('log');
+  if(!el) return;
+  el.innerHTML = G.log.map(l=>{
+    let color='#cbbba0';
+    if(l.msg.includes('💥')||l.msg.includes('☠️')) color='#ff6b6b';
+    else if(l.msg.includes('🛡️')) color='#67e8f9';
+    else if(l.msg.includes('✨')||l.msg.includes('🏆')) color='#fbe29a';
+    else if(l.msg.includes('➡️')) color='#ff9d00';
+    return `<div class="log-entry" style="border-color:${color}44;color:${color}">${l.msg}</div>`;
+  }).join('');
+}
+
+/* ================= PLAYER INIT ================= */
+const AVATARS = ['🧙‍♂️','🧙‍♀️','🧪','⚗️','🔥','💧','🌪️','⚡'];
+const AI_NAMES = ['Alchemist Zepyhr','Profesor Ignis','Master Aqua','Lady Terra','Doktor Plasma','Sage Klorin'];
+let selectedMode = null;
+
+function selectMode(mode){
+  selectedMode = mode;
+  document.querySelectorAll('.mode-btn').forEach(b=>{ b.style.borderColor=''; b.style.background=''; });
+  const btn = $('mode-'+mode);
+  btn.style.borderColor='#fb923c'; btn.style.background='rgba(255,120,0,.12)';
+  $('setupExtra').classList.remove('hidden');
+  buildPlayerConfig();
+}
+
+function buildPlayerConfig(){
+  const count = selectedMode==='1v1'?2:4;
+  let html='';
+  for(let i=0;i<count;i++){
+    let teamLabel='';
+    if(selectedMode==='2v2') teamLabel = `<span class="stat-badge ${i%2===0?'bg-blue-900/60 text-blue-300':'bg-red-900/60 text-red-300'}">${i%2===0?'Tim A':'Tim B'}</span>`;
+    html += `<div class="flex items-center gap-2 flex-wrap">
+      <span class="text-lg">${AVATARS[i]}</span>
+      <input id="pname${i}" value="${i===0?'Kamu':AI_NAMES[i-1]}" class="flex-1 min-w-[120px] bg-black/20 border border-amber-900/40 rounded-lg px-2 py-1 text-xs text-amber-950 font-bold" maxlength="16">
+      ${teamLabel}
+      <label class="flex items-center gap-1 text-[10px] font-bold text-amber-900 cursor-pointer">
+        <input type="checkbox" id="pai${i}" ${i>0?'checked':''} class="accent-orange-600"> AI
+      </label>
+    </div>`;
+  }
+  $('playerConfig').innerHTML = html;
+}
+
+/* ================= START ================= */
+function startGame(){
+  const count = selectedMode==='1v1'?2:4;
+  const players = [];
+  for(let i=0;i<count;i++){
+    const name = $('pname'+i).value.trim() || ('Pemain '+(i+1));
+    const isAI = $('pai'+i).checked;
+    players.push({
+      id:i, name, avatar:AVATARS[i], isAI,
+      team: selectedMode==='2v2' ? (i%2===0?'A':'B') : null,
+      hp:20, maxHp:20, shield:0, energy:3, maxEnergy:3,
+      hand:[], alive:true, catalysts:[], stunNext:0, discountNext:0, vakumNext:0
+    });
+  }
+
+  const mainDeck = makeDeck();
+  const reactionDeck = shuffle([...REACTIONS]);
+
+  players.forEach(p=>{
+    for(let i=0;i<5;i++){ if(mainDeck.length) p.hand.push(mainDeck.pop()); }
+  });
+
+  G = {
+    players, mainDeck, reactionDeck,
+    market: reactionDeck.splice(0,4),
+    turnIdx:0, round:1, log:[], mode:selectedMode,
+    phase:'action', over:false, selectedCards:[], selectedTarget:null
+  };
+
+  $('setup').classList.add('hidden');
+  $('game').classList.remove('hidden');
+  $('winScreen').classList.add('hidden');
+  addLog(`⚔️ Pertarungan dimulai! Mode: ${selectedMode==='ffa'?'Free-For-All':selectedMode==='1v1'?'Duel 1v1':'Tim 2v2'}`);
+  addLog(`➡️ Giliran ${players[0].name} dimulai.`);
+
+  beginTurn();
+  renderAll();
+}
+
+/* ================= TURN FLOW ================= */
+function beginTurn(){
+  const p = G.players[G.turnIdx];
+  if(!p.alive) return nextAlive();
+  p.energy = p.maxEnergy;
+
+  // Draw 2
+  for(let i=0;i<2;i++){
+    if(G.mainDeck.length){
+      if(p.hand.length < 7) p.hand.push(G.mainDeck.pop());
+      else G.mainDeck.pop(); // burn
+    }
+  }
+  if(p.hand.length>7){
+    const discard = p.hand.length-7;
+    for(let i=0;i<discard;i++) p.hand.pop();
+    addLog(`⚠️ ${p.name} membuang ${discard} kartu (tangan penuh).`);
+  }
+
+  // Apply stun
+  if(p.stunNext>0){ p.energy = Math.max(0,p.energy-1); p.stunNext=0; addLog(`⚡ ${p.name} ter-stun! -1 Energi.`); }
+
+  // Apply catalyst timers
+  p.catalysts = p.catalysts.filter(c=>{ c.turns--; return c.turns>0; });
+
+  addLog(`➡️ Giliran ${p.name} dimulai (3 Energi).`);
+  G.phase='action';
+  renderAll();
+  if(p.isAI) setTimeout(aiTurn, 900);
+}
+
+function nextAlive(){
+  let guard=0;
+  do {
+    G.turnIdx = (G.turnIdx+1) % G.players.length;
+    if(G.turnIdx===0) G.round++;
+    guard++;
+  } while(!G.players[G.turnIdx].alive && guard<10);
+  if(checkWin()) return;
+  beginTurn();
+}
+
+function endTurn(){
+  if(G.over) return;
+  if(G.players[G.turnIdx].isAI) return;
+  const p = G.players[G.turnIdx];
+  addLog(`⏭️ ${p.name} mengakhiri giliran.`);
+  p.energy = 0;
+
+  // Refill market
+  while(G.market.length<4 && G.reactionDeck.length){
+    G.market.push(G.reactionDeck.splice(0,1)[0]);
+  }
+  nextAlive();
+}
+
+/* ================= RENDER ================= */
+function renderAll(){
+  if(!G) return;
+  renderOpponents();
+  renderMarket();
+  renderCurrent();
+  renderHand();
+  renderLog();
+}
+
+function renderOpponents(){
+  const cur = G.players[G.turnIdx];
+  const wrap = $('opponents');
+  wrap.innerHTML = '';
+  G.players.forEach(p=>{
+    if(p.id===cur.id && !p.isAI) return; // current human shown below
+    const isActive = G.turnIdx===p.id;
+    const div = document.createElement('div');
+    div.className = `player-panel dark-panel rounded-xl border p-2 space-y-1 ${isActive?'active':''} ${!p.alive?'dead':''}`;
+    const hpPct = Math.max(0, p.hp/p.maxHp*100);
+    const teamBadge = p.team ? `<span class="stat-badge ${p.team==='A'?'bg-blue-900/60 text-blue-300':'bg-red-900/60 text-red-300'}">Tim ${p.team}</span>` : '';
+    div.innerHTML = `
+      <div class="flex items-center justify-between gap-1">
+        <div class="flex items-center gap-1.5 min-w-0">
+          <span class="text-xl">${p.avatar}</span>
+          <div class="min-w-0">
+            <div class="font-bold text-[11px] truncate">${p.name} ${p.isAI?'<span class="text-orange-400 text-[8px]">AI</span>':''}</div>
+            <div class="text-[9px] text-amber-500">${p.hand.length} kartu</div>
+          </div>
+        </div>
+        ${teamBadge}
+      </div>
+      <div class="flex items-center gap-1 text-[10px] font-bold">
+        <span class="text-red-400">❤️ ${p.hp}</span>
+        <span class="text-cyan-400">🛡️ ${p.shield}</span>
+      </div>
+      <div class="h-1.5 rounded-full bg-stone-800 overflow-hidden">
+        <div class="hp-bar h-full ${hpPct>50?'bg-green-500':hpPct>25?'bg-yellow-500':'bg-red-500'}" style="width:${hpPct}%"></div>
+      </div>
+      ${!p.alive?'<div class="text-[9px] text-red-500 font-bold">☠️ GUGUR</div>':''}
+    `;
+    // target button if human can target
+    if(!p.alive || p.id===cur.id) { /* nothing */ }
+    wrap.appendChild(div);
+  });
+}
+
+function renderMarket(){
+  const m = $('market');
+  m.innerHTML = '';
+  for(let i=0;i<4;i++){
+    const r = G.market[i];
+    const div = document.createElement('div');
+    if(!r){
+      div.className = 'reaction-slot';
+      m.appendChild(div);
+      continue;
+    }
+    div.className = 'reaction-slot filled p-2 flex flex-col justify-between';
+    const reqStr = Object.entries(r.req).map(([s,q])=>`${q}×${s}`).join(' + ');
+    div.innerHTML = `
+      <div>
+        <div class="flex justify-between items-start gap-1">
+          <span class="font-bold text-[11px] text-amber-200 leading-tight">${r.name}</span>
+          <span class="px-1.5 rounded bg-amber-900 text-amber-100 text-[9px] font-bold shrink-0">${r.energy}E</span>
+        </div>
+        <div class="text-[9px] text-amber-100/70 mt-0.5">${r.desc}</div>
+      </div>
+      <div class="mt-1 flex flex-wrap gap-0.5">${Object.entries(r.req).map(([s,q])=>`<span class="text-[8px] font-mono px-1 rounded bg-black/40 text-amber-300">${q}×${s}</span>`).join('')}</div>
+    `;
+    div.onclick = ()=> tryCastReaction(i);
+    m.appendChild(div);
+  }
+  $('deckCount').textContent = `Deck: ${G.mainDeck.length} | Reaksi: ${G.reactionDeck.length}`;
+}
+
+function renderCurrent(){
+  const p = G.players[G.turnIdx];
+  $('curAvatar').textContent = p.avatar;
+  $('curAvatar').style.background = p.isAI ? 'linear-gradient(135deg,#7c2d12,#dc2626)' : 'linear-gradient(135deg,#b8741a,#ff9d00)';
+  $('curName').textContent = p.name + (p.isAI?' (AI)':'');
+  $('curHP').textContent = p.hp;
+  $('curShield').textContent = p.shield;
+
+  // Mana pips
+  let pips='';
+  for(let i=0;i<p.maxEnergy;i++){
+    pips += `<span class="mana-pip ${i<p.energy?'':'empty'}"></span>`;
+  }
+  $('manaPips').innerHTML = pips;
+  $('btnEnd').disabled = p.isAI;
+  $('btnEnd').style.opacity = p.isAI ? 0.4 : 1;
+}
+
+/* ================= HAND ================= */
+function renderHand(){
+  const p = G.players[G.turnIdx];
+  const el = $('hand');
+  el.innerHTML = '';
+  $('handCount').textContent = p.hand.length;
+
+  p.hand.forEach((card, idx)=>{
+    const d = document.createElement('div');
+    const isSel = G.selectedCards.includes(card.uid);
+    if(card.kind==='element'){
+      const e = ELEMENTS[card.sym];
+      d.className = `el-card ${isSel?'selected':''} shrink-0 w-20 h-28 rounded-xl border-2 flex flex-col items-center justify-center p-1`;
+      d.style.background = e.bg; d.style.borderColor = e.color; d.style.color = e.color;
+      d.innerHTML = `
+        <span class="f-title text-2xl font-black">${e.sym}</span>
+        <span class="text-[8px] font-bold text-center leading-tight mt-0.5" style="color:#f3e5c8">${e.name}</span>
+        <span class="text-[7px] opacity-70 mt-0.5" style="color:#f3e5c8">${e.type}</span>
+      `;
+    } else if(card.kind==='shield'){
+      const s = SHIELDS.find(x=>x.id===card.cardId);
+      d.className = `el-card ${isSel?'selected':''} shrink-0 w-20 h-28 rounded-xl border-2 flex flex-col items-center justify-center p-1`;
+      d.style.background='rgba(21,94,117,.5)'; d.style.borderColor=s.color; d.style.color=s.color;
+      d.innerHTML = `
+        <span class="text-2xl">🛡️</span>
+        <span class="text-[8px] font-bold text-center leading-tight mt-0.5" style="color:#f3e5c8">${s.name}</span>
+        <span class="text-[8px] font-bold mt-0.5" style="color:#67e8f9">+${s.shield} Shield</span>
+      `;
+    } else {
+      const c = CATALYSTS.find(x=>x.id===card.cardId);
+      d.className = `el-card ${isSel?'selected':''} shrink-0 w-20 h-28 rounded-xl border-2 flex flex-col items-center justify-center p-1`;
+      d.style.background='rgba(120,53,15,.5)'; d.style.borderColor=c.color; d.style.color=c.color;
+      d.innerHTML = `
+        <span class="text-2xl">⚡</span>
+        <span class="text-[8px] font-bold text-center leading-tight mt-0.5" style="color:#f3e5c8">${c.name}</span>
+        <span class="text-[7px] text-center opacity-80 mt-0.5" style="color:#f3e5c8">${c.energy}E</span>
+      `;
+    }
+    if(!p.isAI) d.onclick = ()=> toggleSelectCard(card.uid);
+    el.appendChild(d);
+  });
+}
+
+function toggleSelectCard(uid){
+  const p = G.players[G.turnIdx];
+  const card = p.hand.find(c=>c.uid===uid);
+  if(!card) return;
+  if(G.selectedCards.includes(uid)) G.selectedCards = G.selectedCards.filter(x=>x!==uid);
+  else G.selectedCards.push(uid);
+  renderHand();
+  updateSelectionInfo();
+}
+
+function updateSelectionInfo(){
+  const p = G.players[G.turnIdx];
+  const cards = p.hand.filter(c=>G.selectedCards.includes(c.uid));
+  const syms = {};
+  cards.forEach(c=>{ if(c.kind==='element') syms[c.sym]=(syms[c.sym]||0)+1; });
+  const str = Object.entries(syms).map(([s,q])=>`${q}×${s}`).join(' + ');
+  $('selectionInfo').textContent = cards.length ? `Dipilih: ${str || cards.length+' kartu'}` : '';
+}
+
+/* ================= ACTIONS ================= */
+function openAction(type){
+  const p = G.players[G.turnIdx];
+  if(p.isAI) return;
+  const title = $('actionTitle'), body = $('actionBody');
+  $('actionModal').classList.remove('hidden'); $('actionModal').classList.add('flex');
+
+  if(type==='reaction'){
+    title.textContent = '⚗️ Rakit Reaksi';
+    const list = G.market.map((r,i)=>{
+      const canPay = p.energy >= costWithDiscount(p, r.energy);
+      return `<button onclick="castFromModal(${i})" class="w-full text-left p-2 rounded-xl border ${canPay?'border-amber-500/50 bg-orange-900/20 hover:bg-orange-800/30':'border-stone-700 bg-stone-900/40 opacity-50'} transition">
+        <div class="flex justify-between"><b class="text-amber-200 text-xs">${r.name}</b><span class="text-[9px] px-1.5 rounded bg-amber-900 text-amber-100">${costWithDiscount(p,r.energy)}E</span></div>
+        <div class="text-[10px] text-amber-100/70">${r.desc}</div>
+        <div class="text-[9px] text-amber-400 font-mono mt-0.5">${Object.entries(r.req).map(([s,q])=>q+'×'+s).join(' + ')}</div>
+      </button>`;
+    }).join('');
+    body.innerHTML = list || '<p class="text-xs text-stone-400">Pasar Reaksi kosong.</p>';
+  }
+
+  else if(type==='shield'){
+    title.textContent = '🛡️ Tempa Tameng';
+    const owned = p.hand.filter(c=>c.kind==='shield');
+    if(!owned.length){ body.innerHTML = '<p class="text-xs text-stone-400">Kamu tidak punya kartu Tameng di tangan. Cari di deck!</p>'; return; }
+    body.innerHTML = owned.map(c=>{
+      const s = SHIELDS.find(x=>x.id===c.cardId);
+      return `<button onclick="forgeShield('${c.uid}')" class="w-full text-left p-2 rounded-xl border border-cyan-500/50 bg-cyan-900/20 hover:bg-cyan-800/30 transition mb-1">
+        <div class="flex justify-between"><b class="text-cyan-200 text-xs">${s.name}</b><span class="text-[9px] px-1.5 rounded bg-cyan-900 text-cyan-100">${costWithDiscount(p,s.energy)}E</span></div>
+        <div class="text-[10px] text-cyan-100/70">+${s.shield} Shield Point</div>
+      </button>`;
+    }).join('');
+  }
+
+  else if(type==='catalyst'){
+    title.textContent = '⚡ Pasang Katalis';
+    const owned = p.hand.filter(c=>c.kind==='catalyst');
+    if(!owned.length){ body.innerHTML = '<p class="text-xs text-stone-400">Kamu tidak punya kartu Katalis di tangan.</p>'; return; }
+    body.innerHTML = owned.map(c=>{
+      const k = CATALYSTS.find(x=>x.id===c.cardId);
+      return `<button onclick="equipCatalyst('${c.uid}')" class="w-full text-left p-2 rounded-xl border border-amber-500/50 bg-amber-900/20 hover:bg-amber-800/30 transition mb-1">
+        <div class="flex justify-between"><b class="text-amber-200 text-xs">${k.name}</b><span class="text-[9px] px-1.5 rounded bg-amber-900 text-amber-100">${k.energy}E</span></div>
+        <div class="text-[10px] text-amber-100/70">${k.desc}</div>
+      </button>`;
+    }).join('');
+  }
+
+  else if(type==='transmute'){
+    title.textContent = '♻️ Transmutasi';
+    const p = G.players[G.turnIdx];
+    if(p.energy < 1){ body.innerHTML = '<p class="text-xs text-red-400">Butuh 1 Energi.</p>'; return; }
+    if(p.hand.length < 2){ body.innerHTML = '<p class="text-xs text-red-400">Butuh minimal 2 kartu di tangan.</p>'; return; }
+    body.innerHTML = `<p class="text-xs text-amber-200 mb-2">Pilih 2 kartu untuk dibuang, lalu ambil 1 kartu baru dari deck.</p>
+      <div class="grid grid-cols-4 gap-1">${p.hand.map(c=>{
+        const label = c.kind==='element'? ELEMENTS[c.sym].sym : c.kind==='shield'?'🛡️':'⚡';
+        return `<button onclick="transmutePick('${c.uid}')" id="tr-${c.uid}" class="p-2 rounded-lg border border-amber-700 bg-black/40 text-xs font-bold text-amber-200 hover:bg-orange-900/40">${label}</button>`;
+      }).join('')}</div>
+      <div id="trInfo" class="text-[10px] text-amber-400 mt-2">Dipilih: 0/2</div>`;
+    window._trSel = [];
+  }
+}
+
+function closeAction(){
+  $('actionModal').classList.add('hidden');
+  $('actionModal').classList.remove('flex');
+}
+
+function costWithDiscount(p, base){
+  const disc = p.catalysts.some(c=>c.effect==='discount') ? 1 : 0;
+  return Math.max(1, base - disc);
+}
+
+/* ================= CAST REACTION ================= */
+function castFromModal(idx){
+  closeAction();
+  tryCastReaction(idx);
+}
+
+function tryCastReaction(marketIdx){
+  const p = G.players[G.turnIdx];
+  if(p.isAI || G.over) return;
+  const r = G.market[marketIdx];
+  if(!r) return;
+
+  // check energy
+  const cost = costWithDiscount(p, r.energy);
+  if(p.energy < cost){ toast('⚡ Energi tidak cukup!'); playSound('boom'); return; }
+
+  // check elemental requirements from hand
+  const need = {...r.req};
+  const usedUids = [];
+  for(const sym in need){
+    const cards = p.hand.filter(c=>c.kind==='element' && c.sym===sym && !usedUids.includes(c.uid));
+    if(cards.length < need[sym]){ toast(`❌ Kurang unsur ${sym}!`); playSound('boom'); return; }
+    for(let i=0;i<need[sym];i++) usedUids.push(cards[i].uid);
+  }
+
+  // pay
+  p.energy -= cost;
+  p.hand = p.hand.filter(c=>!usedUids.includes(c.uid));
+
+  // remove reaction from market
+  G.market.splice(marketIdx,1);
+
+  // determine targets
+  let targets = [];
+  if(r.aoe){
+    targets = G.players.filter(t=>t.alive && t.id!==p.id && !isAlly(p,t));
+  } else {
+    // single target: pick highest-HP opponent that's not ally
+    const opps = G.players.filter(t=>t.alive && t.id!==p.id && !isAlly(p,t));
+    if(!opps.length){ toast('Tidak ada lawan hidup.'); return; }
+    targets = [opps.sort((a,b)=>b.hp-a.hp)[0]];
+  }
+
+  // apply effects
+  applyReaction(p, r, targets);
+  addLog(`✨ ${p.name} merakit <b>${r.name}</b>!`);
+  playSound('success');
+  showBoom('⚗️', r.name);
+
+  // refill market
+  while(G.market.length<4 && G.reactionDeck.length){
+    G.market.push(G.reactionDeck.splice(0,1)[0]);
+  }
+
+  checkDeaths();
+  if(checkWin()) return;
+  renderAll();
+}
+
+function applyReaction(caster, r, targets){
+  // catalyst damage bonus
+  let bonusDmg = 0, bonusStun = false;
+  if(caster.catalysts.some(c=>c.effect==='dmg3')) bonusDmg += 3;
+  if(caster.catalysts.some(c=>c.effect==='dmg2stun')){ bonusDmg += 2; bonusStun = true; }
+
+  if(r.heal){
+    const before = caster.hp;
+    caster.hp = Math.min(caster.maxHp, caster.hp + r.heal);
+    addLog(`💚 ${caster.name} memulihkan ${caster.hp-before} HP (${caster.hp}/20).`);
+  }
+
+  if(r.dmg !== undefined && targets.length){
+    targets.forEach(t=>{
+      // vakum check vs AOE
+      if(r.aoe && t.vakumNext>0){ addLog(`🌀 ${t.name} kebal AOE (Ruang Vakum).`); return; }
+
+      let dmg = r.dmg + bonusDmg;
+
+      if(r.pierce){
+        // direct to HP
+        t.hp -= dmg;
+        addLog(`☠️ ${r.name} menembus Shield → ${t.name} -${dmg} HP!`);
+      } else {
+        if(r.shieldBreak){
+          const removed = t.shield;
+          t.shield = 0;
+          if(removed>0) addLog(`🛡️💥 Shield ${t.name} hancur (${removed})!`);
+        }
+        // shield absorbs
+        const absorbed = Math.min(t.shield, dmg);
+        t.shield -= absorbed;
+        const leftover = dmg - absorbed;
+        if(leftover>0) t.hp -= leftover;
+        addLog(`💥 ${t.name} menerima ${dmg} damage (Shield -${absorbed}, HP -${leftover}).`);
+      }
+
+      if(r.stun || bonusStun){
+        t.stunNext = 1;
+        addLog(`⚡ ${t.name} ter-stun giliran berikutnya!`);
+      }
+    });
+  }
+}
+
+function isAlly(a, b){
+  return G.mode==='2v2' && a.team && b.team && a.team===b.team;
+}
+
+/* ================= SHIELDS ================= */
+function forgeShield(uid){
+  const p = G.players[G.turnIdx];
+  const card = p.hand.find(c=>c.uid===uid);
+  if(!card) return;
+  const s = SHIELDS.find(x=>x.id===card.cardId);
+  const cost = costWithDiscount(p, s.energy);
+  if(p.energy < cost){ toast('⚡ Energi tidak cukup!'); return; }
+  p.energy -= cost;
+  p.shield += s.shield;
+  p.hand = p.hand.filter(c=>c.uid!==uid);
+  addLog(`🛡️ ${p.name} menempa ${s.name} (+${s.shield} Shield → total ${p.shield}).`);
+  playSound('page');
+  closeAction();
+  renderAll();
+}
+
+/* ================= CATALYSTS ================= */
+function equipCatalyst(uid){
+  const p = G.players[G.turnIdx];
+  const card = p.hand.find(c=>c.uid===uid);
+  if(!card) return;
+  const k = CATALYSTS.find(x=>x.id===card.cardId);
+  if(p.energy < k.energy){ toast('⚡ Energi tidak cukup!'); return; }
+  p.energy -= k.energy;
+  p.hand = p.hand.filter(c=>c.uid!==uid);
+  const turns = k.effect==='vakum' ? 1 : 3;
+  p.catalysts.push({ effect:k.effect, turns, name:k.name });
+  if(k.effect==='vakum') p.vakumNext = 1;
+  addLog(`⚡ ${p.name} memasang ${k.name} (${turns} putaran).`);
+  playSound('page');
+  closeAction();
+  renderAll();
+}
+
+/* ================= TRANSMUTE ================= */
+function transmutePick(uid){
+  const p = G.players[G.turnIdx];
+  window._trSel = window._trSel || [];
+  if(window._trSel.includes(uid)) window._trSel = window._trSel.filter(x=>x!==uid);
+  else if(window._trSel.length<2) window._trSel.push(uid);
+
+  document.querySelectorAll('[id^="tr-"]').forEach(b=>b.style.background='');
+  window._trSel.forEach(u=>{ const b=$('tr-'+u); if(b) b.style.background='rgba(255,120,0,.4)'; });
+  const info = $('trInfo'); if(info) info.textContent = `Dipilih: ${window._trSel.length}/2`;
+
+  if(window._trSel.length===2){
+    if(p.energy<1){ toast('⚡ Energi tidak cukup!'); return; }
+    p.energy -= 1;
+    p.hand = p.hand.filter(c=>!window._trSel.includes(c.uid));
+    if(G.mainDeck.length){
+      p.hand.push(G.mainDeck.pop());
+      addLog(`♻️ ${p.name} bertransmutasi: buang 2 kartu → ambil 1 kartu baru.`);
+    }
+    window._trSel = [];
+    playSound('success');
+    closeAction();
+    renderAll();
+  }
+}
+
+/* ================= DEATHS & WIN ================= */
+function checkDeaths(){
+  G.players.forEach(p=>{
+    if(p.alive && p.hp<=0){
+      p.alive = false;
+      p.hp = 0;
+      addLog(`☠️ ${p.name} GUGUR!`);
+      playSound('boom');
+    }
+  });
+}
+
+function checkWin(){
+  const alive = G.players.filter(p=>p.alive);
+  if(G.mode==='2v2'){
+    const teamsAlive = new Set(alive.map(p=>p.team));
+    if(teamsAlive.size<=1){
+      G.over = true;
+      const winner = alive.length ? 'Tim '+alive[0].team : 'Tidak ada';
+      showWin(winner, alive.length ? `Kemenangan bersama untuk ${alive.map(p=>p.name).join(' & ')}` : 'Semua gugur');
+      return true;
+    }
+    return false;
+  }
+  if(alive.length<=1){
+    G.over = true;
+    showWin(alive.length? alive[0].name : 'Tidak ada', alive.length ? `${alive[0].name} adalah Alchemist Teragung!` : 'Seri — semua gugur');
+    return true;
+  }
+  return false;
+}
+
+function showWin(name, sub){
+  $('winText').textContent = `🏆 ${name} MENANG!`;
+  $('winSub').textContent = sub;
+  $('winScreen').classList.remove('hidden');
+  $('winScreen').classList.add('flex');
+  playSound('success');
+}
+
+/* ================= AI ================= */
+function aiTurn(){
+  const p = G.players[G.turnIdx];
+  if(!p || !p.alive || G.over) return;
+
+  // 1. Try to cast the best affordable reaction that matches hand
+  const affordable = G.market
+    .map((r,i)=>({r,i}))
+    .filter(({r})=>{
+      const cost = costWithDiscount(p, r.energy);
+      if(p.energy < cost) return false;
+      for(const sym in r.req){
+        if(p.hand.filter(c=>c.kind==='element'&&c.sym===sym).length < r.req[sym]) return false;
+      }
+      return true;
+    })
+    .sort((a,b)=>{
+      // prefer lethal / high damage
+      const dmgA = (a.r.dmg||0) + (a.r.aoe?4:0);
+      const dmgB = (b.r.dmg||0) + (b.r.aoe?4:0);
+      return dmgB - dmgA;
+    });
+
+  if(affordable.length){
+    const pick = affordable[0];
+    setTimeout(()=>{ aiCast(p, pick.i); }, 400);
+    return;
+  }
+
+  // 2. If low HP, try forge a shield
+  if(p.hp <= 10){
+    const sh = p.hand.find(c=>c.kind==='shield');
+    if(sh){
+      const s = SHIELDS.find(x=>x.id===sh.cardId);
+      if(p.energy >= costWithDiscount(p, s.energy)){
+        setTimeout(()=>{ forgeShield(sh.uid); setTimeout(()=>aiContinue(p), 500); }, 300);
+        return;
+      }
+    }
+  }
+
+  // 3. Otherwise end turn
+  setTimeout(()=>{
+    if(G.turnIdx===p.id && !G.over){
+      addLog(`⏭️ ${p.name} (AI) mengakhiri giliran.`);
+      p.energy = 0;
+      while(G.market.length<4 && G.reactionDeck.length){
+        G.market.push(G.reactionDeck.splice(0,1)[0]);
+      }
+      nextAlive();
+    }
+  }, 600);
+}
+
+function aiCast(p, marketIdx){
+  const r = G.market[marketIdx];
+  if(!r) { aiContinue(p); return; }
+  const cost = costWithDiscount(p, r.energy);
+  if(p.energy < cost){ aiContinue(p); return; }
+
+  // consume elements
+  const need = {...r.req};
+  const usedUids = [];
+  for(const sym in need){
+    const cards = p.hand.filter(c=>c.kind==='element' && c.sym===sym && !usedUids.includes(c.uid));
+    for(let i=0;i<need[sym] && i<cards.length;i++) usedUids.push(cards[i].uid);
+  }
+  p.energy -= cost;
+  p.hand = p.hand.filter(c=>!usedUids.includes(c.uid));
+  G.market.splice(marketIdx,1);
+
+  let targets=[];
+  if(r.aoe) targets = G.players.filter(t=>t.alive && t.id!==p.id && !isAlly(p,t));
+  else {
+    const opps = G.players.filter(t=>t.alive && t.id!==p.id && !isAlly(p,t));
+    if(opps.length) targets = [opps.sort((a,b)=>a.hp-b.hp)[0]];
+  }
+
+  applyReaction(p, r, targets);
+  addLog(`✨ ${p.name} (AI) merakit <b>${r.name}</b>!`);
+  playSound('success');
+  showBoom('⚗️', r.name + ' (AI)');
+
+  while(G.market.length<4 && G.reactionDeck.length){
+    G.market.push(G.reactionDeck.splice(0,1)[0]);
+  }
+
+  checkDeaths();
+  if(checkWin()) return;
+  renderAll();
+
+  // AI can try one more action if energy remains
+  setTimeout(()=>{
+    if(!G.over && G.turnIdx===p.id && p.alive) aiTurn();
+    else if(!G.over && G.turnIdx===p.id) aiContinue(p);
+  }, 700);
+}
+
+function aiContinue(p){
+  if(G.over || !p.alive || G.turnIdx!==p.id) return;
+  // spend remaining energy: shield if possible, else end
+  const sh = p.hand.find(c=>c.kind==='shield');
+  if(sh){
+    const s = SHIELDS.find(x=>x.id===sh.cardId);
+    if(p.energy >= costWithDiscount(p, s.energy)){
+      forgeShield(sh.uid);
+      setTimeout(()=>aiContinue(p), 500);
+      return;
+    }
+  }
+  setTimeout(()=>{
+    if(!G.over && G.turnIdx===p.id){
+      addLog(`⏭️ ${p.name} (AI) mengakhiri giliran.`);
+      p.energy=0;
+      while(G.market.length<4 && G.reactionDeck.length) G.market.push(G.reactionDeck.splice(0,1)[0]);
+      nextAlive();
+    }
+  }, 500);
+}
+
+/* ================= BOOM OVERLAY ================= */
+function showBoom(icon, title){
+  $('boomIcon').textContent = icon;
+  $('boomTx').textContent = title;
+  $('boom').classList.add('show');
+  setTimeout(()=>$('boom').classList.remove('show'), 1400);
+}
+
+/* ================= RESTART & RULES ================= */
+function restartGame(){
+  G = null;
+  $('game').classList.add('hidden');
+  $('winScreen').classList.add('hidden');
+  $('winScreen').classList.remove('flex');
+  $('setup').classList.remove('hidden');
+  $('setupExtra').classList.add('hidden');
+  document.querySelectorAll('.mode-btn').forEach(b=>{ b.style.borderColor=''; b.style.background=''; });
+  selectedMode = null;
+}
+
+function openRules(){
+  $('rulesModal').classList.remove('hidden');
+  $('rulesModal').classList.add('flex');
+}
+
+/* ================= SPARK BACKGROUND ================= */
+(function(){
+  const c = $('sparks'); if(!c) return;
+  const x = c.getContext('2d');
+  let w,h;
+  const rs = ()=>{ w=c.width=innerWidth; h=c.height=innerHeight; };
+  rs(); addEventListener('resize', rs);
+  const P = Array.from({length:55},()=>({
+    x:Math.random()*innerWidth, y:Math.random()*innerHeight,
+    s:Math.random()*2+0.6, v:Math.random()*0.8+0.2,
+    a:Math.random()*0.7+0.2, d:Math.random()*Math.PI*2,
+    hue: Math.random()<0.35?190:28
+  }));
+  (function f(){
+    x.clearRect(0,0,w,h);
+    P.forEach(p=>{
+      p.y-=p.v; p.d+=0.02; p.x+=Math.sin(p.d)*0.4;
+      if(p.y<-5){ p.y=h+5; p.x=Math.random()*w; }
+      x.fillStyle=`hsla(${p.hue},100%,60%,${p.a})`;
+      x.shadowColor=`hsl(${p.hue},100%,50%)`; x.shadowBlur=8;
+      x.beginPath(); x.arc(p.x,p.y,p.s,0,6.283); x.fill();
+    });
+    requestAnimationFrame(f);
+  })();
+})();
+</script>
+</body>
+</html>
